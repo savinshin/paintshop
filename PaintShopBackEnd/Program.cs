@@ -44,10 +44,13 @@ builder.Services.AddAutoMapper(cfg => { },
 // CORS для фронта (Angular dev)
 builder.Services.AddCors(o =>
 {
-    o.AddPolicy("frontend", p =>
-        p.WithOrigins("http://localhost:4200")
-         .AllowAnyHeader()
-         .AllowAnyMethod());
+    o.AddPolicy("frontend", p => p
+        .WithOrigins(
+            "http://localhost:4200",
+            "https://paintshopfrontend-production.up.railway.app"
+        )
+        .AllowAnyHeader()
+        .AllowAnyMethod());
 });
 
 // === Supabase JWT ===
