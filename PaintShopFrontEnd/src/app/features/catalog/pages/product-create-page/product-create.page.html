@@ -1,0 +1,138 @@
+<section class="py-8 md:py-10" aria-labelledby="create-title">
+  <div class="container max-w-2xl">
+    <h1 id="create-title" class="text-2xl font-semibold">Новый товар</h1>
+
+    <p class="mt-2 text-sm opacity-80">
+      Карточка будет создана в базе и появится на странице каталога.
+    </p>
+
+    @if (!isAdmin()) {
+      <div class="alert alert-warning mt-6">
+        <span>
+          Эта страница доступна только администратору.
+          <a routerLink="/login" class="link">Войти</a>
+        </span>
+      </div>
+    } @else {
+      @if (loading()) {
+        <div class="mt-6">
+          <div class="skeleton h-6 w-1/3 mb-2"></div>
+          <div class="skeleton h-10 w-full mb-2"></div>
+          <div class="skeleton h-10 w-full mb-2"></div>
+          <div class="skeleton h-10 w-full mb-2"></div>
+        </div>
+      } @else {
+        <form class="mt-6 space-y-4" [formGroup]="form" (ngSubmit)="onSubmit()">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <label class="form-control">
+              <span class="label-text">Название</span>
+              <input type="text" class="input input-bordered" formControlName="name" />
+            </label>
+
+            <label class="form-control">
+              <span class="label-text">Бренд</span>
+              <input type="text" class="input input-bordered" formControlName="brand" />
+            </label>
+
+            <label class="form-control">
+              <span class="label-text">Артикул (SKU)</span>
+              <input type="text" class="input input-bordered" formControlName="sku" />
+            </label>
+
+            <label class="form-control">
+              <span class="label-text">Финиш</span>
+              <input type="text" class="input input-bordered" formControlName="finish" />
+            </label>
+
+            <label class="form-control">
+              <span class="label-text">Объём, мл</span>
+              <input type="number" class="input input-bordered" formControlName="packageMl" />
+            </label>
+
+            <label class="form-control">
+              <span class="label-text">Цена</span>
+              <input type="number" class="input input-bordered" formControlName="price" />
+            </label>
+
+            <label class="form-control">
+              <span class="label-text">Валюта</span>
+              <input type="text" class="input input-bordered" formControlName="currency" />
+            </label>
+
+            <label class="form-control">
+              <span class="label-text">Количество на складе</span>
+              <input type="number" class="input input-bordered" formControlName="stockQty" />
+            </label>
+
+            <label class="form-control md:col-span-2">
+              <span class="label-text">Категория</span>
+
+              <select
+                #rootSelect
+                class="select select-bordered"
+                [value]="selectedRootId() ?? ''"
+                (change)="onRootCategoryChange(rootSelect.value)"
+              >
+                <option value="">Не выбрано</option>
+                @for (c of rootCategories(); track c.id) {
+                  <option [value]="c.id">{{ c.name }}</option>
+                }
+              </select>
+
+              <span class="text-xs opacity-70 mt-1">
+                Выберите основную категорию (можно без подкатегорий).
+              </span>
+            </label>
+
+            <label class="form-control md:col-span-2">
+              <span class="label-text">Подкатегории</span>
+
+              <select
+                multiple
+                size="8"
+                class="select select-bordered"
+                formControlName="categoryIds"
+                [disabled]="selectedRootId() == null"
+              >
+                @for (c of childCategories(); track c.id) {
+                  <option [ngValue]="c.id">{{ c.name }}</option>
+                }
+              </select>
+
+              @if (selectedRootId() == null) {
+                <span class="text-xs opacity-70 mt-1">Сначала выберите категорию.</span>
+              } @else {
+                <span class="text-xs opacity-70 mt-1">
+                  Зажмите Ctrl (Cmd) для выбора нескольких подкатегорий.
+                </span>
+              }
+            </label>
+
+            <label class="form-control">
+              <span class="label-text">HEX-цвет (#RRGGBB)</span>
+              <input type="text" class="input input-bordered" formControlName="hex" />
+            </label>
+
+            <label class="form-control">
+              <span class="label-text">URL изображения</span>
+              <input type="url" class="input input-bordered" formControlName="imageUrl" />
+            </label>
+          </div>
+
+          @if (error()) {
+            <div class="alert alert-error mt-2">
+              <span>{{ error() }}</span>
+            </div>
+          }
+
+          <div class="mt-4 flex gap-2">
+            <button class="btn btn-primary" type="submit" [disabled]="saving()">
+              @if (!saving()) { <span>Создать</span> } @else { <span>Создаём…</span> }
+            </button>
+            <a class="btn btn-ghost" routerLink="/catalog">Отмена</a>
+          </div>
+        </form>
+      }
+    }
+  </div>
+</section>

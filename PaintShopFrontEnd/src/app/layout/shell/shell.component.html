@@ -1,0 +1,167 @@
+<!-- NAVBAR (sticky, big font, desktop: menu + phone + icons; mobile: logo smaller + phone only + dropdown) -->
+<header class="sticky top-0 z-50 border-b border-base-200 bg-base-100/90 backdrop-blur"
+  (document:keydown.escape)="closeMenu()">
+  <div class="w-full px-3 sm:px-6 lg:px-10">
+    <div class="navbar px-0 min-h-16 md:min-h-20">
+      <!-- LEFT: hamburger + logo -->
+      <div class="navbar-start gap-2">
+        <div class="dropdown" [class.dropdown-open]="menuOpen()">
+          <button id="menu-button" type="button" class="btn btn-ghost lg:hidden" aria-haspopup="menu"
+            [attr.aria-expanded]="menuOpen() ? 'true' : 'false'" (click)="toggleMenu()"
+            [attr.aria-label]="menuOpen() ? 'Закрыть меню' : 'Открыть меню'" aria-controls="mobile-menu">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor" aria-hidden="true" focusable="false">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+
+          <!-- MOBILE DROPDOWN (all links) -->
+          <ul id="mobile-menu" role="menu" aria-labelledby="menu-button"
+            [attr.aria-hidden]="menuOpen() ? 'false' : 'true'" [attr.tabindex]="menuOpen() ? '0' : '-1'"
+            [attr.inert]="menuOpen() ? null : ''"
+            class="menu menu-sm dropdown-content mt-3 z-[70] p-2 shadow bg-base-100 rounded-box w-64 text-base"
+            (click)="closeMenu()" (keydown.escape)="closeMenu()">
+            <li role="none"><a role="menuitem" routerLink="/">О нас</a></li>
+            <li role="none"><a role="menuitem" routerLink="/avtoparts">Автозапчасти</a></li>
+            <li role="none"><a role="menuitem" routerLink="/podbor-kraski">Подбор краски</a></li>
+            <li role="none"><a role="menuitem" routerLink="/kuzovnoy-remont">Кузовной ремонт</a></li>
+          </ul>
+        </div>
+
+        <!-- Logo (shrinks on small screens) -->
+        <a routerLink="/" class="btn btn-ghost px-2">
+          <img src="/img/logo.svg" alt="Автомагазин" class="h-8 sm:h-9 md:h-10 w-auto object-contain" />
+        </a>
+      </div>
+
+      <!-- DESKTOP MENU (center, bigger font) -->
+      <div class="navbar-center hidden lg:flex">
+        <ul class="menu menu-horizontal px-1 text-lg font-semibold">
+          <li><a routerLink="/">О нас</a></li>
+          <li><a routerLink="/avtoparts">Автозапчасти</a></li>
+          <li><a routerLink="/podbor-kraski">Подбор краски</a></li>
+          <li><a routerLink="/cuz-remont">Кузовной ремонт</a></li>
+        </ul>
+      </div>
+
+      <!-- RIGHT -->
+      <div class="navbar-end gap-2">
+        <!-- MOBILE: only phone -->
+        <a class="lg:hidden text-base sm:text-lg font-semibold" href="tel:+375293138893">
+          +375 (29) 313-88-93
+        </a>
+
+        <!-- DESKTOP: phone + icons (no borders) -->
+        <div class="hidden lg:flex items-center gap-3">
+          <a class="text-lg font-semibold hover:opacity-80" href="tel:+375293138893">
+            +375 (29) 313-88-93
+          </a>
+
+          <a class="inline-flex h-10 w-10 items-center justify-center rounded-full hover:bg-base-200/60"
+            href="https://t.me/USERNAME" target="_blank" rel="noopener" aria-label="Telegram">
+            <img src="/img/icons/telegram.svg" alt="" class="h-5 w-5" />
+          </a>
+
+          <a class="inline-flex h-10 w-10 items-center justify-center rounded-full hover:bg-base-200/60"
+            href="https://wa.me/375293138893" target="_blank" rel="noopener" aria-label="WhatsApp">
+            <img src="/img/icons/whatsapp.svg" alt="" class="h-5 w-5" />
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- MAIN -->
+<main id="main" class="min-h-[60vh]">
+  <router-outlet></router-outlet>
+</main>
+<!-- FOOTER (3 columns on desktop, stacked on mobile) -->
+<footer class="bg-base-200 text-base-content">
+  <div class="container mx-auto px-4 py-10">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
+      <!-- LEFT: logo + text + telegram -->
+      <div class="space-y-4">
+        <a routerLink="/" class="inline-flex items-center gap-3">
+          <!-- logo ~75% smaller (was h-10) -->
+          <img src="/img/logo.svg" alt="Автомагазин" class="h-7.5 w-auto object-contain" />
+        </a>
+
+        <p class="opacity-80">
+          Широкий выбор профессиональных<br />
+          материалов для кузовного ремонта<br />
+          и покраски автомобилей
+        </p>
+
+        <!-- telegram x2 (was 40x40 button + 20px icon) -->
+        <a class="inline-flex h-20 w-20 items-center justify-center rounded-full hover:bg-base-300/60"
+          href="https://t.me/USERNAME" target="_blank" rel="noopener" aria-label="Telegram">
+          <img src="/img/icons/telegram-white.svg" alt="" class="h-10 w-10" />
+        </a>
+      </div>
+
+      <!-- CENTER: navigation -->
+      <nav>
+        <h6 class="footer-title">Навигация</h6>
+        <ul class="mt-3 space-y-2 text-base">
+          <li><a class="link link-hover" routerLink="/">О нас</a></li>
+          <li><a class="link link-hover" routerLink="/avtoparts">Автозапчасти</a></li>
+          <li><a class="link link-hover" routerLink="/podbor-kraski">Подбор краски</a></li>
+          <li><a class="link link-hover" routerLink="/cuz-remont">Кузовной ремонт</a></li>
+        </ul>
+      </nav>
+
+      <!-- RIGHT: contacts -->
+      <div>
+        <h6 class="footer-title">Контакты</h6>
+
+        <div class="mt-3 space-y-4">
+          <!-- phone -->
+          <div class="flex items-start gap-3">
+            <img src="/img/icons/phone-white.svg" alt="" class="mt-0.5 h-5 w-5 opacity-80" />
+            <a class="link link-hover font-semibold" href="tel:+375293138893">+375293138893</a>
+          </div>
+
+          <!-- email -->
+          <div class="flex items-start gap-3">
+            <img src="/img/icons/mail-white.svg" alt="" class="mt-0.5 h-5 w-5 opacity-80" />
+            <a class="link link-hover font-semibold" href="mailto:info@example.by">info@example.by</a>
+          </div>
+
+          <!-- address (clickable) -->
+          <div class="flex items-start gap-3">
+            <img src="/img/icons/map-white.svg" alt="" class="mt-0.5 h-5 w-5 opacity-80" />
+            <div>
+              <a class="link link-hover font-semibold" href="https://yandex.ru/map-widget/v1/?ll=26.064184%2C53.132216&mode=poi&poi%5Bpoint%5D=26.064237%2C53.132310&poi%5Buri%5D=ymapsbm1%3A%2F%2Forg%3Foid%3D78641658195&z=20.03" target="_blank"
+                rel="noopener">
+                г. Барановичи, улица Тельмана, 90А
+              </a>
+            </div>
+          </div>
+
+
+          <!-- worktime (NEW) -->
+          <div class="flex items-start gap-3">
+            <img src="/img/icons/clock-white.svg" alt="" class="mt-0.5 h-5 w-5 opacity-80" />
+            <div>
+
+              <!-- сюда вставлять твой график -->
+              <div class="opacity-80">
+                Пн–Чт: 9:00–18:00<br />
+                Пт: 9:00–17:00<br />
+                Сб–Вс: выходной<br />
+                <span class="opacity-80">Обед: 13:00–14:00</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-base-300">
+    <div class="container mx-auto px-4 py-4 text-sm opacity-80">
+      © {{ year }} Магазин автозапчастей — Барановичи
+    </div>
+  </div>
+</footer>

@@ -1,0 +1,121 @@
+<section class="py-8 md:py-10" aria-labelledby="catalog-title">
+  <div class="container">
+    <h1 id="catalog-title" class="text-2xl font-semibold">Каталог товаров</h1>
+    <p class="opacity-80">Мок-данные для предпросмотра. Наличие/цены уточняйте.</p>
+
+    <div class="mt-4 flex flex-wrap items-center gap-2">
+      <label class="input input-bordered flex items-center gap-2 max-w-md">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M21 21l-4.35-4.35M10 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16z"/>
+        </svg>
+        <input
+          #queryInput
+          type="search"
+          name="q"
+          placeholder="Поиск по названию, бренду или артикулу"
+          [value]="q()"
+          (input)="onQueryInput(queryInput.value)"
+          aria-label="Поиск по каталогу"
+          autocomplete="off"
+          autocapitalize="off"
+          spellcheck="false"
+        />
+      </label>
+
+      @if (isAdmin()) {
+        <a class="btn btn-primary ml-auto" routerLink="/catalog/new">
+          + Новый товар
+        </a>
+      }
+    </div>
+
+    @if (loading()) {
+      <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        @for (_ of [1,2,3]; track $index) {
+          <div class="card card-bordered">
+            <div class="card-body">
+              <div class="skeleton h-40 w-full"></div>
+              <div class="skeleton h-4 w-1/2 mt-3"></div>
+              <div class="skeleton h-4 w-1/3 mt-2"></div>
+              <div class="skeleton h-8 w-24 mt-4"></div>
+            </div>
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="mt-6" aria-live="polite">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          @for (p of items(); track p.id) {
+            <article class="card card-bordered hover:shadow">
+              <figure class="p-4">
+                <div class="w-full h-40 rounded-box overflow-hidden border border-base-200 bg-base-200">
+                  @if (p.imageUrl) {
+                    <img
+                      [ngSrc]="p.imageUrl"
+                      [attr.alt]="p.name || 'Товар'"
+                      width="640"
+                      height="360"
+                      loading="lazy"
+                      decoding="async"
+                      class="w-full h-full object-cover"
+                    />
+                  }
+                </div>
+              </figure>
+
+              <div class="card-body pt-0">
+                <h3 class="card-title text-base">{{ p.name || 'Без названия' }}</h3>
+
+                <p class="opacity-80 text-sm">
+                  {{ p.brand }}
+                  @if (p.sku) { <span>• {{ p.sku }}</span> }
+                </p>
+
+                <div class="mt-2 flex items-center gap-2 text-sm">
+                  @if (p.finish) { <span class="badge badge-ghost">{{ p.finish }}</span> }
+                  @if (p.packageMl != null) { <span class="badge badge-ghost">{{ p.packageMl }} мл</span> }
+                  @if (p.hex != null && p.hex !== '') {
+                    <span
+                      class="w-4 h-4 rounded-sm border"
+                      [style.background]="p.hex"
+                      aria-label="цвет"
+                    ></span>
+                  }
+                </div>
+
+                <div class="card-actions justify-between items-center mt-3">
+                  <div class="text-sm font-medium">
+                    @if (p.price != null) {
+                      {{ p.price }} {{ p.currency || 'BYN' }}
+                    } @else {
+                      Цена по запросу
+                    }
+                  </div>
+
+                  <div class="flex gap-2">
+                    <a class="btn btn-sm btn-primary" href="https://wa.me/375290000000" rel="noopener">
+                      Заказать
+                    </a>
+
+                    @if (isAdmin()) {
+                      <a class="btn btn-sm btn-ghost" [routerLink]="['/catalog', p.id, 'edit']">
+                        Редактировать
+                      </a>
+                    }
+                  </div>
+                </div>
+              </div>
+            </article>
+          }
+        </div>
+
+        @if (items().length === 0) {
+          <div class="alert mt-6">
+            <span>Ничего не найдено. Попробуйте изменить запрос.</span>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</section>

@@ -1,0 +1,52 @@
+<section class="py-8 md:py-10" aria-labelledby="login-title">
+  <div class="container max-w-md">
+    <h1 id="login-title" class="text-2xl font-semibold">Вход для администратора</h1>
+    <p class="opacity-80 text-sm mt-2">
+      Введите email и пароль администратора, созданного в Supabase.
+    </p>
+
+    <form class="mt-4 space-y-4" [formGroup]="form" (ngSubmit)="onSubmit()">
+      <label class="form-control w-full">
+        <span class="label-text">Email</span>
+        <input
+          type="email"
+          class="input input-bordered w-full"
+          formControlName="email"
+          autocomplete="email"
+        />
+        @if (email.invalid && email.touched) {
+          <span class="text-error text-xs mt-1">Укажите корректный email.</span>
+        }
+      </label>
+
+      <label class="form-control w-full">
+        <span class="label-text">Пароль</span>
+        <input
+          type="password"
+          class="input input-bordered w-full"
+          formControlName="password"
+          autocomplete="current-password"
+        />
+        @if (password.invalid && password.touched) {
+          <span class="text-error text-xs mt-1">
+            Пароль обязателен (минимум 6 символов).
+          </span>
+        }
+      </label>
+
+      <button class="btn btn-primary w-full" type="submit" [disabled]="form.invalid || loading()">
+        @if (!loading()) { <span>Войти</span> } @else { <span>Входим…</span> }
+      </button>
+    </form>
+
+    @if (error()) {
+      <div class="alert alert-error mt-4">
+        <span>{{ error() }}</span>
+      </div>
+    }
+
+    <div class="mt-4 text-sm">
+      <a routerLink="/" class="link">На главную</a>
+    </div>
+  </div>
+</section>
