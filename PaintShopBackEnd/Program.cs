@@ -47,7 +47,7 @@ builder.Services.AddCors(o =>
     o.AddPolicy("frontend", p => p
         .WithOrigins(
             "http://localhost:4200",
-            "https://paintshopfrontend-production.up.railway.app"
+            "https://paintshop-frontend-production.up.railway.app"
         )
         .AllowAnyHeader()
         .AllowAnyMethod());
