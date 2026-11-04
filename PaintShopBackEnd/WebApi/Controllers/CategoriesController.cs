@@ -1,4 +1,5 @@
 using AutoMapper;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using PaintShopBackEnd.Application.Commands.Categories;
 using PaintShopBackEnd.Application.Interfaces;
@@ -41,8 +42,18 @@ namespace PaintShopBackEnd.WebApi.Controllers
         [Authorize(Policy = "AdminOnly")]
         [HttpPost]
         public async Task<ActionResult<CategoryResponse>> CreateCategory(
-            [FromBody] CreateCategoryRequest request)
+            [FromBody] CreateCategoryRequest request,
+            [FromServices] IValidator<CreateCategoryRequest> validator)
         {
+            var validationResult = await validator.ValidateAsync(request, HttpContext.RequestAborted);
+            if (!validationResult.IsValid)
+            {
+                foreach (var error in validationResult.Errors)
+                    ModelState.AddModelError(error.PropertyName, error.ErrorMessage);
+
+                return ValidationProblem(ModelState);
+            }
+
             var command = _mapper.Map<CreateCategoryCommand>(request);
             var created = await _service.CreateAsync(command);
             var dto = _mapper.Map<CategoryResponse>(created);
@@ -54,8 +65,18 @@ namespace PaintShopBackEnd.WebApi.Controllers
         [HttpPut("{id:int}")]
         public async Task<ActionResult<CategoryResponse>> UpdateCategory(
             int id,
-            [FromBody] UpdateCategoryRequest request)
+            [FromBody] UpdateCategoryRequest request,
+            [FromServices] IValidator<UpdateCategoryRequest> validator)
         {
+            var validationResult = await validator.ValidateAsync(request, HttpContext.RequestAborted);
+            if (!validationResult.IsValid)
+            {
+                foreach (var error in validationResult.Errors)
+                    ModelState.AddModelError(error.PropertyName, error.ErrorMessage);
+
+                return ValidationProblem(ModelState);
+            }
+
             var command = _mapper.Map<UpdateCategoryCommand>(request);
             command.Id = id;
 

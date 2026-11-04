@@ -12,15 +12,20 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using FluentValidation;
-using FluentValidation.AspNetCore;
+using PaintShopBackEnd.WebApi.Models.Categories;
+using PaintShopBackEnd.WebApi.Models.Products;
+using PaintShopBackEnd.WebApi.Validation.Categories;
+using PaintShopBackEnd.WebApi.Validation.Products;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Controllers + Validation + Swagger
 builder.Services.AddControllers();
 
-builder.Services.AddFluentValidationAutoValidation();
-builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+builder.Services.AddScoped<IValidator<CreateProductRequest>, CreateProductRequestValidator>();
+builder.Services.AddScoped<IValidator<UpdateProductRequest>, UpdateProductRequestValidator>();
+builder.Services.AddScoped<IValidator<CreateCategoryRequest>, CreateCategoryRequestValidator>();
+builder.Services.AddScoped<IValidator<UpdateCategoryRequest>, UpdateCategoryRequestValidator>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

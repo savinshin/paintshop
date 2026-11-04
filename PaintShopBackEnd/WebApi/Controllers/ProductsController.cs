@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using AutoMapper;
+using FluentValidation;
 using PaintShopBackEnd.Application.Commands.Products;
 using PaintShopBackEnd.Application.Interfaces;
 using PaintShopBackEnd.WebApi.Models.Products;
@@ -44,8 +45,19 @@ namespace PaintShopBackEnd.WebApi.Controllers
 
         [Authorize(Policy = "AdminOnly")]
         [HttpPost]
-        public async Task<ActionResult<ProductResponse>> CreateProduct([FromBody] CreateProductRequest request)
+        public async Task<ActionResult<ProductResponse>> CreateProduct(
+            [FromBody] CreateProductRequest request,
+            [FromServices] IValidator<CreateProductRequest> validator)
         {
+            var validationResult = await validator.ValidateAsync(request, HttpContext.RequestAborted);
+            if (!validationResult.IsValid)
+            {
+                foreach (var error in validationResult.Errors)
+                    ModelState.AddModelError(error.PropertyName, error.ErrorMessage);
+
+                return ValidationProblem(ModelState);
+            }
+
             var command = _mapper.Map<CreateProductCommand>(request);
             var created = await _service.CreateAsync(command);
             var dto = _mapper.Map<ProductResponse>(created);
@@ -54,8 +66,20 @@ namespace PaintShopBackEnd.WebApi.Controllers
 
         [Authorize(Policy = "AdminOnly")]
         [HttpPut("{id}")]
-        public async Task<ActionResult<ProductResponse>> UpdateProduct(string id, [FromBody] UpdateProductRequest request)
+        public async Task<ActionResult<ProductResponse>> UpdateProduct(
+            string id,
+            [FromBody] UpdateProductRequest request,
+            [FromServices] IValidator<UpdateProductRequest> validator)
         {
+            var validationResult = await validator.ValidateAsync(request, HttpContext.RequestAborted);
+            if (!validationResult.IsValid)
+            {
+                foreach (var error in validationResult.Errors)
+                    ModelState.AddModelError(error.PropertyName, error.ErrorMessage);
+
+                return ValidationProblem(ModelState);
+            }
+
             var command = _mapper.Map<UpdateProductCommand>(request);
             command.Id = id; // из роутинга
 
