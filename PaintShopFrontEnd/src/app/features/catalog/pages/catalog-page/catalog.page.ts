@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnInit, effect, inject, signal } from '@angular/core';
-import { CommonModule, NgOptimizedImage } from '@angular/common';
+import { NgOptimizedImage } from '@angular/common';
 import { finalize } from 'rxjs';
 import { RouterLink } from '@angular/router';
 import { CatalogService } from '@core/services/catalog.service';
@@ -10,7 +10,7 @@ import { AuthService } from '@core/services/auth.service';
 @Component({
   standalone: true,
   selector: 'app-catalog-page',
-  imports: [CommonModule, NgOptimizedImage, RouterLink],
+  imports: [NgOptimizedImage, RouterLink],
   templateUrl: 'catalog.page.html',
   styleUrl: 'catalog.page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

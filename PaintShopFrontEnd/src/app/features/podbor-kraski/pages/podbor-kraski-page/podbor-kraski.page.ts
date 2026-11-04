@@ -1,10 +1,10 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { SeoService } from '@core/services/seo.service';
 
 @Component({
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: 'podbor-kraski.page.html',
   styleUrl: 'podbor-kraski.page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

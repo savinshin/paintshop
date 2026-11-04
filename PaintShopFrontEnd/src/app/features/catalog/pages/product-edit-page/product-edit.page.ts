@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { finalize } from 'rxjs';
@@ -16,7 +16,7 @@ import { Category } from '@core/models/category.model';
 @Component({
   standalone: true,
   selector: 'app-product-edit-page',
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink],
   templateUrl: 'product-edit.page.html',
   styleUrl: 'product-edit.page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
