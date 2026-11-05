@@ -40,7 +40,8 @@ if (seedCommand == "seed-demo")
 }
 
 // Controllers + Validation + Swagger
-builder.Services.AddControllers(options => options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute()));
+builder.Services.AddControllersWithViews(options =>
+    options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute()));
 
 builder.Services.AddScoped<IValidator<CreateProductRequest>, CreateProductRequestValidator>();
 builder.Services.AddScoped<IValidator<UpdateProductRequest>, UpdateProductRequestValidator>();
