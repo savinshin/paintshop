@@ -16,8 +16,27 @@ using PaintShopBackEnd.WebApi.Models.Categories;
 using PaintShopBackEnd.WebApi.Models.Products;
 using PaintShopBackEnd.WebApi.Validation.Categories;
 using PaintShopBackEnd.WebApi.Validation.Products;
+using PaintShopBackEnd.Infrastructure.Data.Seeding;
 
-var builder = WebApplication.CreateBuilder(args);
+var seedCommand = args.Length > 0 && (args[0] is "seed" or "seed-demo") ? args[0] : null;
+var builder = WebApplication.CreateBuilder(seedCommand is null ? args : args[1..]);
+
+if (seedCommand == "seed-demo")
+{
+    var dotnetEnvironment = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT");
+    var aspnetEnvironment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+    var launchProfile = Environment.GetEnvironmentVariable("DOTNET_LAUNCH_PROFILE");
+
+    if (!builder.Environment.IsDevelopment()
+        || (!string.IsNullOrEmpty(dotnetEnvironment) && !dotnetEnvironment.Equals("Development", StringComparison.OrdinalIgnoreCase))
+        || (!string.IsNullOrEmpty(aspnetEnvironment) && !aspnetEnvironment.Equals("Development", StringComparison.OrdinalIgnoreCase))
+        || !string.IsNullOrEmpty(launchProfile))
+    {
+        Console.Error.WriteLine("seed-demo requires Development and no launch profile. Use dotnet run --no-launch-profile -- seed-demo.");
+        Environment.ExitCode = 1;
+        return;
+    }
+}
 
 // Controllers + Validation + Swagger
 builder.Services.AddControllers();
@@ -104,6 +123,19 @@ builder.Services.AddAuthorization(opt =>
 
 
 var app = builder.Build();
+
+if (seedCommand is not null)
+{
+    await using var scope = app.Services.CreateAsyncScope();
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+    if (seedCommand == "seed")
+        await CategorySeeder.SeedAsync(db);
+    else
+        await DemoProductSeeder.SeedAsync(db);
+
+    return;
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
