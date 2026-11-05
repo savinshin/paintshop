@@ -22,10 +22,13 @@ export class LoginPageComponent implements OnInit {
 
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
+  readonly isAdmin = this.auth.isAdmin;
+  readonly adminEmail = this.auth.email;
+  readonly sessionError = this.auth.sessionError;
 
   readonly form = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, Validators.minLength(6)]],
+    password: ['', [Validators.required]],
   });
 
   ngOnInit(): void {
@@ -56,6 +59,17 @@ export class LoginPageComponent implements OnInit {
     }
 
     this.router.navigateByUrl('/catalog');
+  }
+
+  async onLogout(): Promise<void> {
+    if (this.loading()) return;
+
+    this.error.set(null);
+    this.loading.set(true);
+    const result = await this.auth.logout();
+    this.loading.set(false);
+    if (!result.ok)
+      this.error.set(result.error ?? 'Ошибка выхода');
   }
 
   get email() {

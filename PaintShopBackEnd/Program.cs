@@ -7,18 +7,19 @@ using PaintShopBackEnd.Application.Mappings;
 using PaintShopBackEnd.Application.Interfaces;
 using PaintShopBackEnd.Application.Services;
 using PaintShopBackEnd.WebApi.Mappings;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.DataProtection;
+using System.Threading.RateLimiting;
 using FluentValidation;
 using PaintShopBackEnd.WebApi.Models.Categories;
 using PaintShopBackEnd.WebApi.Models.Products;
 using PaintShopBackEnd.WebApi.Validation.Categories;
 using PaintShopBackEnd.WebApi.Validation.Products;
 using PaintShopBackEnd.Infrastructure.Data.Seeding;
+using PaintShopBackEnd.Infrastructure.Auth;
 
-var seedCommand = args.Length > 0 && (args[0] is "seed" or "seed-demo") ? args[0] : null;
+var seedCommand = args.Length > 0 && (args[0] is "seed" or "seed-demo" or "create-admin") ? args[0] : null;
 var builder = WebApplication.CreateBuilder(seedCommand is null ? args : args[1..]);
 
 if (seedCommand == "seed-demo")
@@ -39,7 +40,7 @@ if (seedCommand == "seed-demo")
 }
 
 // Controllers + Validation + Swagger
-builder.Services.AddControllers();
+builder.Services.AddControllers(options => options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute()));
 
 builder.Services.AddScoped<IValidator<CreateProductRequest>, CreateProductRequestValidator>();
 builder.Services.AddScoped<IValidator<UpdateProductRequest>, UpdateProductRequestValidator>();
@@ -77,48 +78,58 @@ builder.Services.AddCors(o =>
         .AllowAnyMethod());
 });
 
-// === Supabase JWT ===
-var projectRef = builder.Configuration["Supabase:ProjectId"];
-var jwtSecret  = builder.Configuration["Supabase:JwtSecret"]; // добавим в user-secrets
+builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
+{
+    options.User.RequireUniqueEmail = true;
+    options.Password.RequiredLength = 12;
+    options.Lockout.AllowedForNewUsers = true;
+    options.Lockout.MaxFailedAccessAttempts = 5;
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
+}).AddEntityFrameworkStores<AppDbContext>();
 
-if (string.IsNullOrWhiteSpace(projectRef))
-    Console.WriteLine("WARN: Supabase:ProjectId not set. Auth issuer will not validate correctly.");
-
-if (string.IsNullOrWhiteSpace(jwtSecret))
-    Console.WriteLine("WARN: Supabase:JwtSecret not set. JWT signature validation will fail.");
-
-var authority = $"https://{projectRef}.supabase.co/auth/v1";
-
-builder.Services
-    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(o =>
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.Cookie.HttpOnly = true;
+    options.Cookie.SameSite = SameSiteMode.Lax;
+    options.Cookie.SecurePolicy = builder.Environment.IsDevelopment() ? CookieSecurePolicy.SameAsRequest : CookieSecurePolicy.Always;
+    options.ExpireTimeSpan = TimeSpan.FromHours(8);
+    options.SlidingExpiration = false;
+    options.Events.OnRedirectToLogin = context =>
     {
-        o.RequireHttpsMetadata = !builder.Environment.IsDevelopment();
-        o.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidIssuer = authority,
+        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+        return Task.CompletedTask;
+    };
+    options.Events.OnRedirectToAccessDenied = context =>
+    {
+        context.Response.StatusCode = StatusCodes.Status403Forbidden;
+        return Task.CompletedTask;
+    };
+});
 
-            ValidateAudience = false,
+builder.Services.AddAntiforgery(options =>
+{
+    options.HeaderName = "X-XSRF-TOKEN";
+    options.Cookie.HttpOnly = true;
+    options.Cookie.SameSite = SameSiteMode.Lax;
+    options.Cookie.SecurePolicy = builder.Environment.IsDevelopment() ? CookieSecurePolicy.SameAsRequest : CookieSecurePolicy.Always;
+});
 
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(jwtSecret ?? string.Empty))
-        };
-    });
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.AddPolicy("login", context => RateLimitPartition.GetFixedWindowLimiter(
+        context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+        _ => new FixedWindowRateLimiterOptions { PermitLimit = 10, Window = TimeSpan.FromMinutes(1), QueueLimit = 0 }));
+});
+
+var dataProtection = builder.Services.AddDataProtection().SetApplicationName("PaintShop");
+var keyPath = builder.Configuration["DataProtection:KeyPath"];
+if (!string.IsNullOrWhiteSpace(keyPath))
+    dataProtection.PersistKeysToFileSystem(new DirectoryInfo(keyPath));
 
 builder.Services.AddAuthorization(opt =>
 {
-    // AdminOnly: app_metadata.role == "admin"
-    opt.AddPolicy("AdminOnly", policy =>
-        policy.RequireAssertion(ctx =>
-        {
-            var meta = ctx.User.FindFirst("app_metadata");
-            if (meta is null) return false;
-
-            // простая проверка JSON-строки
-            return meta.Value.Contains("\"role\":\"admin\"", StringComparison.OrdinalIgnoreCase);
-        }));
+    opt.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
 });
 
 
@@ -129,7 +140,9 @@ if (seedCommand is not null)
     await using var scope = app.Services.CreateAsyncScope();
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-    if (seedCommand == "seed")
+    if (seedCommand == "create-admin")
+        Environment.ExitCode = await AdminCreator.RunAsync(scope.ServiceProvider, db);
+    else if (seedCommand == "seed")
         await CategorySeeder.SeedAsync(db);
     else
         await DemoProductSeeder.SeedAsync(db);
@@ -145,7 +158,9 @@ if (app.Environment.IsDevelopment())
 }
 
 // app.UseHttpsRedirection();
+app.UseRouting();
 app.UseCors("frontend");
+app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 

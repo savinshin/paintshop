@@ -1,67 +1,88 @@
-import { Injectable, signal } from '@angular/core';
-import { createClient, SupabaseClient, Session } from '@supabase/supabase-js';
-import { environment } from '../../../environments/environment';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Injectable, inject, signal } from '@angular/core';
+import { firstValueFrom, timeout } from 'rxjs';
+
+interface AuthState {
+  email: string | null;
+  isAdmin: boolean;
+}
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private readonly supabase: SupabaseClient;
+  private readonly http = inject(HttpClient);
 
-  readonly session = signal<Session | null>(null);
-  readonly isAdmin = signal<boolean>(false);
+  readonly email = signal<string | null>(null);
+  readonly isAdmin = signal(false);
+  readonly sessionError = signal<string | null>(null);
 
-  private readonly readyPromise: Promise<void>;
-
-  constructor() {
-    this.supabase = createClient(environment.supabaseUrl, environment.supabaseAnonKey);
-
-    this.readyPromise = this.restoreSession().catch(() => {
-      this.session.set(null);
-      this.isAdmin.set(false);
-    });
-
-    this.supabase.auth.onAuthStateChange((_event, session) => {
-      this.session.set(session);
-      this.isAdmin.set(this.extractIsAdmin(session));
-    });
-  }
+  private readonly readyPromise = this.reloadSession();
 
   whenReady(): Promise<void> {
     return this.readyPromise;
   }
 
-  private async restoreSession(): Promise<void> {
-    const { data } = await this.supabase.auth.getSession();
-    const session = data.session ?? null;
-
-    this.session.set(session);
-    this.isAdmin.set(this.extractIsAdmin(session));
-  }
-
-  async login(email: string, password: string): Promise<{ ok: boolean; error?: string }> {
-    const { data, error } = await this.supabase.auth.signInWithPassword({ email, password });
-
-    if (error) return { ok: false, error: error.message };
-
-    const session = data.session ?? null;
-    this.session.set(session);
-    this.isAdmin.set(this.extractIsAdmin(session));
-
-    return { ok: true };
-  }
-
-  async logout(): Promise<void> {
-    await this.supabase.auth.signOut();
-    this.session.set(null);
+  clearSession(): void {
+    this.email.set(null);
     this.isAdmin.set(false);
   }
 
-  getAccessToken(): string | null {
-    return this.session()?.access_token ?? null;
+  async reloadSession(): Promise<void> {
+    try {
+      const state = await firstValueFrom(this.http.get<AuthState>('/api/auth/me').pipe(timeout(10000)));
+      await this.refreshCsrf();
+      this.email.set(state.email);
+      this.isAdmin.set(state.isAdmin);
+      this.sessionError.set(null);
+    } catch {
+      this.clearSession();
+      this.sessionError.set('Не удалось проверить авторизацию. Проверьте соединение.');
+    }
   }
 
-  private extractIsAdmin(session: Session | null): boolean {
-    if (!session) return false;
-    const appMeta = session.user.app_metadata as Record<string, unknown> | undefined;
-    return appMeta?.['role'] === 'admin';
+  async login(email: string, password: string): Promise<{ ok: boolean; error?: string }> {
+    try {
+      await this.whenReady();
+      await this.refreshCsrf();
+      await firstValueFrom(this.http.post<void>('/api/auth/login', { email, password }).pipe(timeout(10000)));
+      await this.reloadSession();
+      if (!this.isAdmin())
+        return { ok: false, error: this.sessionError()
+          ? 'Вход выполнен, но проверить сессию не удалось. Обновите страницу.'
+          : 'Не удалось проверить права администратора.' };
+      return { ok: true };
+    } catch (error) {
+      if (error instanceof HttpErrorResponse && error.status === 401)
+        return { ok: false, error: 'Неверный email или пароль.' };
+      if (error instanceof HttpErrorResponse && error.status === 429)
+        return { ok: false, error: 'Слишком много попыток. Попробуйте позже.' };
+      return { ok: false, error: 'Не удалось войти. Проверьте соединение и попробуйте ещё раз.' };
+    }
+  }
+
+  async logout(): Promise<{ ok: boolean; error?: string }> {
+    try {
+      await this.whenReady();
+      await this.refreshCsrf();
+      await firstValueFrom(this.http.post<void>('/api/auth/logout', {}).pipe(timeout(10000)));
+      this.clearSession();
+      try {
+        await this.refreshCsrf();
+        this.sessionError.set(null);
+      } catch {
+        this.sessionError.set('Вы вышли, но обновить защиту запроса не удалось. Обновите страницу.');
+      }
+      return { ok: true };
+    } catch (error) {
+      if (error instanceof HttpErrorResponse && error.status === 401) {
+        this.clearSession();
+        await this.reloadSession();
+        return { ok: true };
+      }
+      return { ok: false, error: 'Не удалось завершить сеанс. Проверьте соединение и попробуйте ещё раз.' };
+    }
+  }
+
+  private async refreshCsrf(): Promise<void> {
+    await firstValueFrom(this.http.get<void>('/api/auth/csrf').pipe(timeout(10000)));
   }
 }

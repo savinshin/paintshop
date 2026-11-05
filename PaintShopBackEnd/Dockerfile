@@ -4,7 +4,8 @@ WORKDIR /app
 
 COPY PaintShopBackEnd.csproj ./
 RUN dotnet restore \
-    && dotnet tool install --tool-path /usr/local/bin dotnet-ef --version 10.0.14
+    && dotnet tool install --tool-path /usr/local/bin dotnet-ef --version 10.0.14 \
+    && mkdir -p /root/.aspnet && chmod 700 /root/.aspnet
 
 COPY . .
 
