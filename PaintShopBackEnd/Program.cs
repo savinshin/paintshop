@@ -71,10 +71,7 @@ builder.Services.AddAutoMapper(cfg => { },
 builder.Services.AddCors(o =>
 {
     o.AddPolicy("frontend", p => p
-        .WithOrigins(
-            "http://localhost:4200",
-            "https://paintshop-frontend-production.up.railway.app"
-        )
+        .WithOrigins("http://localhost:4200")
         .AllowAnyHeader()
         .AllowAnyMethod());
 });

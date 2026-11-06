@@ -26,3 +26,16 @@ Thumbs.db
 **/appsettings.*.local.json
 PaintShopBackEnd/secrets.txt
 **/secrets*.txt
+
+# Database dumps and private keys
+*.dump
+*.backup
+*.pgdump
+*.sql.gz
+backups/
+dumps/
+*.pem
+*.key
+*.pfx
+*.p12
+.pgpass

@@ -27,15 +27,22 @@ export class AuthService {
   }
 
   async reloadSession(): Promise<void> {
+    let state: AuthState;
     try {
-      const state = await firstValueFrom(this.http.get<AuthState>('/api/auth/me').pipe(timeout(10000)));
-      await this.refreshCsrf();
-      this.email.set(state.email);
-      this.isAdmin.set(state.isAdmin);
-      this.sessionError.set(null);
+      state = await firstValueFrom(this.http.get<AuthState>('/api/auth/me').pipe(timeout(10000)));
     } catch {
       this.clearSession();
       this.sessionError.set('Не удалось проверить авторизацию. Проверьте соединение.');
+      return;
+    }
+
+    this.email.set(state.email);
+    this.isAdmin.set(state.isAdmin);
+    try {
+      await this.refreshCsrf();
+      this.sessionError.set(null);
+    } catch {
+      this.sessionError.set('Не удалось обновить защиту запросов. Повторите попытку.');
     }
   }
 
@@ -45,10 +52,10 @@ export class AuthService {
       await this.refreshCsrf();
       await firstValueFrom(this.http.post<void>('/api/auth/login', { email, password }).pipe(timeout(10000)));
       await this.reloadSession();
+      if (this.sessionError())
+        return { ok: false, error: 'Вход выполнен, но завершить проверку сессии не удалось. Обновите страницу.' };
       if (!this.isAdmin())
-        return { ok: false, error: this.sessionError()
-          ? 'Вход выполнен, но проверить сессию не удалось. Обновите страницу.'
-          : 'Не удалось проверить права администратора.' };
+        return { ok: false, error: 'Не удалось проверить права администратора.' };
       return { ok: true };
     } catch (error) {
       if (error instanceof HttpErrorResponse && error.status === 401)
