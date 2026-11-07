@@ -75,8 +75,8 @@
             <label class="form-control md:col-span-2">
               <span class="label-text">Категории</span>
               <select multiple size="8" class="select select-bordered" formControlName="categoryIds" (change)="clearFieldError('categoryIds')">
-                @for (c of categories(); track c.id) {
-                  <option [ngValue]="c.id">{{ getCategoryLabel(c) }}</option>
+                @for (c of categoryOptions(); track c.id) {
+                  <option [ngValue]="c.id">{{ c.label }}</option>
                 }
               </select>
               @if (fieldError('categoryIds'); as message) { <span class="text-xs opacity-70 mt-1">{{ message }}</span> }

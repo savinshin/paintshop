@@ -44,29 +44,43 @@ export class ProductCreatePageComponent implements OnInit {
   private readonly sortCategories = (a: Category, b: Category) =>
     (a.sortOrder ?? 0) - (b.sortOrder ?? 0) || a.id - b.id;
 
-  readonly rootCategories = computed(() =>
-    this.categories()
-      .filter((c) => c.parentId == null)
-      .slice()
-      .sort(this.sortCategories),
-  );
+  private readonly categoriesByParent = computed(() => {
+    const index = new Map<number | null, Category[]>();
+    for (const category of this.categories()) {
+      const siblings = index.get(category.parentId);
+      if (siblings) siblings.push(category);
+      else index.set(category.parentId, [category]);
+    }
+    for (const siblings of index.values()) siblings.sort(this.sortCategories);
+    return index;
+  });
+
+  readonly rootCategories = computed(() => this.categoriesByParent().get(null) ?? []);
 
   readonly childCategories = computed(() => {
     const rootId = this.selectedRootId();
     const descendants: { id: number; label: string }[] = [];
     if (rootId == null) return descendants;
 
-    const categories = this.categories();
+    const index = this.categoriesByParent();
+    const visited = new Set<number>([rootId]);
+    const pending: { category: Category; parentPath: string }[] = [];
     const addChildren = (parentId: number, parentPath: string): void => {
-      const children = categories.filter((c) => c.parentId === parentId).sort(this.sortCategories);
-      for (const child of children) {
-        const label = parentPath ? `${parentPath} → ${child.name}` : child.name;
-        descendants.push({ id: child.id, label });
-        addChildren(child.id, label);
+      const children = index.get(parentId) ?? [];
+      for (let i = children.length - 1; i >= 0; i--) {
+        pending.push({ category: children[i], parentPath });
       }
     };
 
     addChildren(rootId, '');
+    while (pending.length > 0) {
+      const { category, parentPath } = pending.pop()!;
+      if (visited.has(category.id)) continue;
+      visited.add(category.id);
+      const label = parentPath ? `${parentPath} → ${category.name}` : category.name;
+      descendants.push({ id: category.id, label });
+      addChildren(category.id, label);
+    }
     return descendants;
   });
 

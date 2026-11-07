@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -38,6 +38,26 @@ export class ProductEditPageComponent implements OnInit {
   readonly error = signal<string | null>(null);
 
   readonly categories = signal<Category[]>([]);
+  readonly categoryOptions = computed(() => {
+    const categories = this.categories();
+    const categoriesById = new Map(categories.map((category) => [category.id, category]));
+
+    return categories.map((category) => {
+      const names = [category.name];
+      const visited = new Set([category.id]);
+      let parentId = category.parentId;
+
+      while (parentId != null && !visited.has(parentId)) {
+        const parent = categoriesById.get(parentId);
+        if (!parent) break;
+        visited.add(parent.id);
+        names.unshift(parent.name);
+        parentId = parent.parentId;
+      }
+
+      return { id: category.id, label: names.join(' → ') };
+    });
+  });
   readonly categoriesLoaded = signal(false);
   readonly productLoaded = signal(false);
   readonly serverErrors = signal<Record<string, string[]>>({});
@@ -196,21 +216,5 @@ export class ProductEditPageComponent implements OnInit {
           this.error.set('Не удалось сохранить изменения. Попробуйте ещё раз.');
         },
       });
-  }
-
-  getCategoryLabel(c: Category): string {
-    const names = [c.name];
-    const visited = new Set([c.id]);
-    let parentId = c.parentId;
-
-    while (parentId != null && !visited.has(parentId)) {
-      const parent = this.categories().find((category) => category.id === parentId);
-      if (!parent) break;
-      visited.add(parent.id);
-      names.unshift(parent.name);
-      parentId = parent.parentId;
-    }
-
-    return names.join(' → ');
   }
 }
