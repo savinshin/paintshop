@@ -34,12 +34,12 @@ namespace PaintShopBackEnd.Infrastructure.Data.Repositories
             return _context.Products.AnyAsync(p => p.Sku == sku && p.Id != excludeId, cancellationToken);
         }
 
-        public async Task<IEnumerable<Product>> GetAllAsync(string? query)
+        public async Task<IEnumerable<Product>> GetAllAsync(string? query, CancellationToken cancellationToken)
         {
-            return await ApplySearch(_context.Products.Include(p => p.ProductCategories), query).ToListAsync();
+            return await ApplySearch(_context.Products.Include(p => p.ProductCategories), query).ToListAsync(cancellationToken);
         }
 
-        public async Task<IEnumerable<Product>> GetByCategoryIdsAsync(IEnumerable<int> categoryIds, string? query)
+        public async Task<IEnumerable<Product>> GetByCategoryIdsAsync(IEnumerable<int> categoryIds, string? query, CancellationToken cancellationToken)
         {
             var ids = categoryIds.Distinct().ToList();
             if (ids.Count == 0)
@@ -47,7 +47,7 @@ namespace PaintShopBackEnd.Infrastructure.Data.Repositories
 
             var products = _context.Products.Include(p => p.ProductCategories)
                 .Where(p => p.ProductCategories.Any(pc => ids.Contains(pc.CategoryId)));
-            return await ApplySearch(products, query).ToListAsync();
+            return await ApplySearch(products, query).ToListAsync(cancellationToken);
         }
 
         private static IQueryable<Product> ApplySearch(IQueryable<Product> products, string? query)

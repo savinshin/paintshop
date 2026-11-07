@@ -16,7 +16,8 @@ public class ProductService : IProductService
         _categoryRepo = categoryRepo;
     }
 
-    public Task<IEnumerable<Product>> GetAllAsync(string? query) => _repo.GetAllAsync(query);
+    public Task<IEnumerable<Product>> GetAllAsync(string? query, CancellationToken cancellationToken) =>
+        _repo.GetAllAsync(query, cancellationToken);
 
     public Task<bool> SkuExistsAsync(string sku, string? excludeId, CancellationToken cancellationToken) =>
         _repo.SkuExistsAsync(sku.Trim().ToUpperInvariant(), excludeId, cancellationToken);
@@ -106,16 +107,16 @@ public class ProductService : IProductService
         await _repo.DeleteAsync(id);
     }
 
-    public async Task<IEnumerable<Product>> GetByCategoryAsync(int categoryId, bool includeDescendants, string? query)
+    public async Task<IEnumerable<Product>> GetByCategoryAsync(int categoryId, bool includeDescendants, string? query, CancellationToken cancellationToken)
     {
         if (!includeDescendants)
-            return await _repo.GetByCategoryIdsAsync(new[] { categoryId }, query);
+            return await _repo.GetByCategoryIdsAsync(new[] { categoryId }, query, cancellationToken);
 
-        var allCategories = (await _categoryRepo.GetAllAsync()).ToList();
+        var allCategories = (await _categoryRepo.GetAllAsync(cancellationToken)).ToList();
         var ids = new List<int>();
         CollectCategoryIds(categoryId, allCategories, ids);
 
-        return await _repo.GetByCategoryIdsAsync(ids, query);
+        return await _repo.GetByCategoryIdsAsync(ids, query, cancellationToken);
     }
 
     private static void CollectCategoryIds(int rootId, List<Category> all, List<int> result)

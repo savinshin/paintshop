@@ -30,8 +30,8 @@ namespace PaintShopBackEnd.WebApi.Controllers
             [FromQuery] string? q = null)
         {
             var items = categoryId.HasValue
-                ? await _service.GetByCategoryAsync(categoryId.Value, includeDescendants, q)
-                : await _service.GetAllAsync(q);
+                ? await _service.GetByCategoryAsync(categoryId.Value, includeDescendants, q, HttpContext.RequestAborted)
+                : await _service.GetAllAsync(q, HttpContext.RequestAborted);
 
             return Ok(_mapper.Map<IEnumerable<ProductResponse>>(items));
         }
@@ -91,9 +91,6 @@ namespace PaintShopBackEnd.WebApi.Controllers
 
                 return ValidationProblem(ModelState);
             }
-
-            if (await _service.SkuExistsAsync(request.sku, id, HttpContext.RequestAborted))
-                return DuplicateSku();
 
             try
             {
