@@ -22,7 +22,7 @@ services:
       context: ./PaintShopBackEnd
     environment:
       ASPNETCORE_ENVIRONMENT: Development
-      ASPNETCORE_URLS: http://0.0.0.0:8080
+      AUTOMAPPER_LICENSE_KEY: ${AUTOMAPPER_LICENSE_KEY:-}
       DOTNET_USE_POLLING_FILE_WATCHER: "true"
       DOTNET_WATCH_SUPPRESS_LAUNCH_BROWSER: "true"
       ConnectionStrings__Postgres: Host=db;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
