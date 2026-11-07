@@ -64,14 +64,14 @@ docker compose exec backend dotnet ef database update
 Create an administrator interactively when needed:
 
 ```bash
-docker compose run --rm backend dotnet run --no-launch-profile -- create-admin
+docker compose exec backend dotnet run --no-build --no-launch-profile -- create-admin
 ```
 
 Seed categories; load demonstration products only when explicitly needed:
 
 ```bash
-docker compose run --rm backend dotnet run --no-launch-profile -- seed
-docker compose run --rm backend dotnet run --no-launch-profile -- seed-demo
+docker compose exec backend dotnet run --no-build --no-launch-profile -- seed
+docker compose exec backend dotnet run --no-build --no-launch-profile -- seed-demo
 ```
 
 Local URLs with the default `.env.example` ports:

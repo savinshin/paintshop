@@ -25,19 +25,19 @@ docker compose exec backend dotnet ef database update
 ## Admin
 
 ```bash
-docker compose run --rm backend dotnet run --no-launch-profile -- create-admin
+docker compose exec backend dotnet run --no-build --no-launch-profile -- create-admin
 ```
 
 ## Categories seed
 
 ```bash
-docker compose run --rm backend dotnet run --no-launch-profile -- seed
+docker compose exec backend dotnet run --no-build --no-launch-profile -- seed
 ```
 
 ## Development seed data (optional)
 
 ```bash
-docker compose run --rm backend dotnet run --no-launch-profile -- seed-demo
+docker compose exec backend dotnet run --no-build --no-launch-profile -- seed-demo
 ```
 
 ## Check backend:
