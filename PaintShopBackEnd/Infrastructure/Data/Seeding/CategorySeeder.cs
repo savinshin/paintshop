@@ -7,11 +7,25 @@ public static class CategorySeeder
 {
     private static readonly (string Name, string Slug, string? ParentSlug, int SortOrder)[] Categories =
     [
-        ("Абразивные материалы", "abrazivnye-materialy", null, 1),
-        ("Автоэмали", "avtoemali", null, 2),
-        ("Герметики и клеи", "germetiki-i-klei", null, 3),
-        ("Грунты", "grunty", null, 4),
-        ("Лаки", "laki", null, 5),
+        ("Автозапчасти", "avtozapchasti", null, 1),
+        ("Материалы", "materialy", null, 2),
+
+        ("Фильтры масляные", "filtry-maslyanye", "avtozapchasti", 1),
+        ("Тормозные жидкости", "tormoznye-zhidkosti", "avtozapchasti", 2),
+        ("Щётки стеклоочистителя (дворники)", "shchetki-stekloochistitelya", "avtozapchasti", 3),
+        ("Моторные масла", "motornye-masla", "avtozapchasti", 4),
+        ("Антифризы", "antifrizy", "avtozapchasti", 5),
+        ("Свечи автомобильные", "svechi-avtomobilnye", "avtozapchasti", 6),
+        ("Тормозные диски", "tormoznye-diski", "avtozapchasti", 7),
+        ("Стеклоомыватели", "stekloomyvateli", "avtozapchasti", 8),
+        ("Автолампы", "avtolampy", "avtozapchasti", 9),
+        ("Тормозные колодки дисковые", "tormoznye-kolodki-diskovye", "avtozapchasti", 10),
+
+        ("Абразивные материалы", "abrazivnye-materialy", "materialy", 1),
+        ("Автоэмали", "avtoemali", "materialy", 2),
+        ("Герметики и клеи", "germetiki-i-klei", "materialy", 3),
+        ("Грунты", "grunty", "materialy", 4),
+        ("Лаки", "laki", "materialy", 5),
 
         ("Абразивная губка", "abrazivnaya-gubka", "abrazivnye-materialy", 1),
         ("Абразивная полоска", "abrazivnaya-poloska", "abrazivnye-materialy", 2),

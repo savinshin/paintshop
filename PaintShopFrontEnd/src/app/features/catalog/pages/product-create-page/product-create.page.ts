@@ -53,12 +53,21 @@ export class ProductCreatePageComponent implements OnInit {
 
   readonly childCategories = computed(() => {
     const rootId = this.selectedRootId();
-    if (rootId == null) return [] as Category[];
+    const descendants: { id: number; label: string }[] = [];
+    if (rootId == null) return descendants;
 
-    return this.categories()
-      .filter((c) => c.parentId === rootId)
-      .slice()
-      .sort(this.sortCategories);
+    const categories = this.categories();
+    const addChildren = (parentId: number, parentPath: string): void => {
+      const children = categories.filter((c) => c.parentId === parentId).sort(this.sortCategories);
+      for (const child of children) {
+        const label = parentPath ? `${parentPath} → ${child.name}` : child.name;
+        descendants.push({ id: child.id, label });
+        addChildren(child.id, label);
+      }
+    };
+
+    addChildren(rootId, '');
+    return descendants;
   });
 
   readonly form = this.fb.nonNullable.group({

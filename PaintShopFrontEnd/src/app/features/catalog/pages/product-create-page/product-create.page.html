@@ -105,7 +105,7 @@
                 [disabled]="selectedRootId() == null"
               >
                 @for (c of childCategories(); track c.id) {
-                  <option [ngValue]="c.id">{{ c.name }}</option>
+                  <option [ngValue]="c.id">{{ c.label }}</option>
                 }
               </select>
 

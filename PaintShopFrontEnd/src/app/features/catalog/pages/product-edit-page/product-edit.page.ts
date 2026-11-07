@@ -199,8 +199,18 @@ export class ProductEditPageComponent implements OnInit {
   }
 
   getCategoryLabel(c: Category): string {
-    if (c.parentId == null) return c.name;
-    const parent = this.categories().find((p) => p.id === c.parentId);
-    return parent ? `${parent.name} → ${c.name}` : c.name;
+    const names = [c.name];
+    const visited = new Set([c.id]);
+    let parentId = c.parentId;
+
+    while (parentId != null && !visited.has(parentId)) {
+      const parent = this.categories().find((category) => category.id === parentId);
+      if (!parent) break;
+      visited.add(parent.id);
+      names.unshift(parent.name);
+      parentId = parent.parentId;
+    }
+
+    return names.join(' → ');
   }
 }
