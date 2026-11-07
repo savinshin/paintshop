@@ -1,87 +1,49 @@
-# PaintShop (Monorepo)
+# PaintShop
 
-This repository contains:
-- **PaintShopBackEnd** — ASP.NET Core Web API (.NET 8, EF Core, PostgreSQL/Supabase)
-- **PaintShopFrontEnd** — Angular app
+ASP.NET Core Web API (.NET 10), Angular 22, PostgreSQL 18. Local development with Docker Compose.
 
-## Prerequisites
-
-- .NET SDK 8
-- Node.js + npm
-- PostgreSQL connection (Supabase/Postgres)
-
-## Project structure
-
-- `PaintShopBackEnd/` — API
-- `PaintShopFrontEnd/` — Frontend
-
----
-
-## Backend (PaintShopBackEnd)
-
-### 1) Restore dependencies
+## ENV
 
 ```bash
-cd PaintShopBackEnd
-dotnet restore
+cp .env.example .env
 ```
 
-### 2) Configure local secrets (recommended)
+Set `POSTGRES_PASSWORD` in `.env`.
 
-Secrets must NOT be committed to git.
+## Docker
 
 ```bash
-dotnet user-secrets set "ConnectionStrings:Postgres" "<YOUR_POSTGRES_CONNECTION_STRING>"
-dotnet user-secrets set "Supabase:ProjectId" "<YOUR_SUPABASE_PROJECT_ID>"
-dotnet user-secrets set "Supabase:JwtSecret" "<YOUR_SUPABASE_JWT_SECRET>"
+docker compose up -d --build
 ```
 
-Verify:
-```bash
-dotnet user-secrets list
-```
-
-### 3) Apply EF Core migrations (Supabase)
-
-`dotnet ef` may not pick up `launchSettings.json`, so set the environment explicitly.
-
-Linux/macOS:
-```bash
-ASPNETCORE_ENVIRONMENT=Development dotnet ef database update
-```
-
-Windows PowerShell:
-```powershell
-$env:ASPNETCORE_ENVIRONMENT="Development"
-dotnet ef database update
-```
-
-### 4) Run the API
+## Database migrations
 
 ```bash
-dotnet run --launch-profile http
+docker compose exec backend dotnet ef database update
 ```
 
-- Swagger: http://localhost:5027/swagger
-
----
-
-## Frontend (PaintShopFrontEnd)
-
-### 1) Install dependencies
+## Admin
 
 ```bash
-cd PaintShopFrontEnd
-npm install
+docker compose run --rm backend dotnet run --no-launch-profile -- create-admin
 ```
 
-### 2) Run dev server
+## Categories seed
 
-From `PaintShopFrontEnd/`:
 ```bash
-npm run ng -- serve
+docker compose run --rm backend dotnet run --no-launch-profile -- seed
 ```
 
-- Frontend: http://localhost:4200
+## Development seed data (optional)
 
-Note: Backend CORS is configured for http://localhost:4200
+```bash
+docker compose run --rm backend dotnet run --no-launch-profile -- seed-demo
+```
+
+## Check backend:
+
+http://localhost:5027/swagger
+
+## Check frontend:
+
+http://localhost:4200/
