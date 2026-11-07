@@ -1,125 +1,220 @@
 # AGENTS.md — PaintShop
 
-## 1. Назначение и границы
+## 1. Project and stack
 
-PaintShop — действующий сайт и каталог автомагазина в Барановичах: автоэмали, подбор краски, автозапчасти и материалы для кузовного ремонта. Репозиторий: `savinshin/paintshop`, основная ветка — `main`.
+Repository: `savinshin/paintshop`. Main branch: `main`.
 
-Это коммерческий проект, который развивается по согласованным задачам. Новые модули, сущности БД, API, страницы и изменения архитектуры допустимы, когда необходимы для задачи. Не ограничивай решение искусственно, но не добавляй несвязанный функционал и преждевременные абстракции.
+PaintShop is an existing website and online catalog for a real automotive paint and body-repair supply store in Baranovichi, Belarus. Reliability, correctness, security, maintainability, and practical extensibility take priority.
 
-Прямые указания пользователя и текущая задача имеют приоритет над этим файлом. Если указания противоречат существующим контрактам или друг другу, сообщи о конфликте до реализации; не угадывай решение.
+The project may grow through new pages, APIs, modules, database tables, or justified architectural changes. Do not artificially limit a task to small changes, but do not add unrelated features or premature abstractions.
 
-## 2. Стек и структура
+Current scope: public catalog, product and category administration, and informational pages. Do not introduce carts, checkout, orders, payments, or other e-commerce flows without a separate task.
 
-Проверяй фактические версии по проектным файлам перед выводами. На момент составления:
+Current stack (verify versions and configuration in the repository before relying on them):
 
-- Backend: C#, ASP.NET Core Web API, .NET 8, Entity Framework Core 9, Npgsql, PostgreSQL/Supabase.
-- Авторизация: Supabase Auth, JWT; административные API-операции защищены политикой `AdminOnly`.
-- Frontend: Angular 20, TypeScript, RxJS, Tailwind CSS 4, daisyUI 5, Angular Material/CDK.
-- Развёртывание: Railway. Текущий Angular frontend использует CSR, не SSR.
+- Backend: C#, ASP.NET Core Web API, .NET 10, EF Core 10, Npgsql, AutoMapper, FluentValidation.
+- Database: PostgreSQL 18.
+- Authentication: ASP.NET Core Identity, cookie authentication, antiforgery protection, `Admin` role.
+- Frontend: Angular 22, TypeScript, RxJS, Tailwind CSS 4, daisyUI 5, Angular Material/CDK.
+- Local infrastructure: Docker and Docker Compose.
+- Rendering: Angular CSR. SSR/SSG is not currently configured.
 
-Монорепозиторий:
+Repository layout:
 
-- `PaintShopBackEnd/Domain/` — сущности и интерфейсы.
-- `PaintShopBackEnd/Application/` — команды, сервисы, логика приложения.
-- `PaintShopBackEnd/Infrastructure/` — EF Core, конфигурация моделей, миграции, репозитории.
-- `PaintShopBackEnd/WebApi/` — контроллеры, request/response-модели, маппинг, валидация.
-- `PaintShopBackEnd/Program.cs` — регистрация сервисов, БД, CORS и JWT.
-- `PaintShopFrontEnd/src/app/core/` — API-сервисы, модели, guards, interceptors.
-- `PaintShopFrontEnd/src/app/features/` — страницы и функциональные разделы.
-- `PaintShopFrontEnd/src/app/layout/` — общий интерфейс.
-- `PaintShopFrontEnd/src/environments/` — конфигурация frontend для окружений.
+- `PaintShopBackEnd/Domain/` — domain entities and interfaces.
+- `PaintShopBackEnd/Application/` — commands, services, application interfaces, and mappings.
+- `PaintShopBackEnd/Infrastructure/` — EF Core context, model configurations, migrations, repositories, seeding, and admin creation.
+- `PaintShopBackEnd/WebApi/` — controllers, request/response models, validation, and API mappings.
+- `PaintShopBackEnd/Program.cs` — application setup, authentication, authorization, and middleware.
+- `PaintShopFrontEnd/src/app/core/` — API services, models, guards, and interceptors.
+- `PaintShopFrontEnd/src/app/features/` — pages and feature code.
+- `PaintShopFrontEnd/src/app/layout/` — shared application shell.
+- `PaintShopFrontEnd/src/environments/` — frontend environment configuration.
+- `compose.yaml` — local `db`, `backend`, and `frontend` services.
+- `.env.example` — local environment template; `.env` must not be committed.
+- `README.md` — local setup instructions.
 
-Используй текущую архитектуру как отправную точку, а не как неизменяемую целевую схему. Не переносить автоматически решения из других проектов.
+Do not import the architecture or business rules of Phone Accessories, CRM, or another project into PaintShop by default.
 
-## 3. Порядок работы
+## 2. Sources of truth and working language
 
-1. Определи конкретную задачу и ожидаемое поведение. При анализе или ревью не вноси изменения.
-2. Убедись, с какой веткой и рабочими файлами работаешь; проверь `git status --short` и относящиеся к задаче изменения. Не перезаписывай незакоммиченную работу.
-3. Прочитай затрагиваемые файлы и ближайшие аналоги; проследи путь данных от UI через API до модели/БД, когда задача пересекает слои.
-4. Для сложной или рискованной задачи сначала кратко предложи решение, затрагиваемые файлы, совместимость и риски; согласуй спорные архитектурные решения.
-5. Изменяй только необходимое для согласованного результата. Если выявлены соседние проблемы, перечисли их отдельно.
-6. После реализации проверь diff, сообщи о фактически выполненных проверках и оставшихся рисках.
+Use this order when making decisions:
 
-Не утверждай, что функциональность реализована, слита, протестирована или работает в production, без соответствующего подтверждения. Отчёт Codex не заменяет проверку кода.
+1. The current task and explicit user instructions.
+2. Applicable `AGENTS.md` instructions.
+3. Current source code, database migrations, API contracts, and configuration.
+4. README and other project documentation.
+5. Previously approved decisions.
 
-## 4. Контроль scope и качество
+If a document contradicts current code, report the discrepancy instead of silently guessing. Distinguish planned changes, unmerged work, merged `main`, locally verified behavior, and production behavior.
 
-- Явная просьба реализовать задачу разрешает изменения относящегося к ней исходного кода, но **не** разрешает автоматически Git-операции, установки, миграции, тесты или деплой.
-- Не добавляй незапрошенные страницы, сущности, поля, фильтры, сценарии, UI-улучшения, рефакторинг или оптимизации.
-- Не добавляй `try/catch`, fallback, дополнительные guards и обходные ветки «на всякий случай». Проверки должны опираться на реальные требования и контракты; необходимые обработку ошибок и валидацию не пропускай.
-- Не придумывай поля БД, JSON-ключи, API-параметры, роли, значения или поведение внешних сервисов.
-- При необходимости нового слоя, зависимости или изменения архитектуры объясни, какую проблему это решает, и согласуй решение.
-- Сохраняй стиль соседнего кода; не переписывай работающие части приложения ради единообразия.
+Write new or modified repository documentation, developer instructions, code comments, and technical descriptions in English. Preserve established identifiers and external contracts. Do not translate existing customer-facing Russian/Belarusian content, validation messages, legal text, store details, or URLs unless the task explicitly requests it.
 
-## 5. Backend и API
+## 3. Local development
 
-- Сохраняй существующее разделение `Domain / Application / Infrastructure / WebApi`, если задача не предусматривает его изменения.
-- Следуй действующим подходам EF Core, AutoMapper, FluentValidation, сервисов и репозиториев. Не вводи дополнительные паттерны без обоснованной бизнес-потребности.
-- Текущий API товаров: `GET /api/Products`, `GET /api/Products/{id}`; `POST`, `PUT`, `DELETE` — административные. Для категорий: `/api/Categories`, дополнительно `GET /api/Categories/tree`.
-- Не выводи возможности API из названий frontend-методов или передаваемых query-параметров: подтверждай фактическую поддержку по контроллеру, сервису и репозиторию.
-- Проверяй request/response-модели и маппинги перед правками в API. Изменение контракта оценивай вместе со всеми потребителями на frontend.
-- Публичные GET и изменяющие операции имеют разные требования к доступу. Проверка на Angular не заменяет серверную авторизацию.
-- Возвращай контролируемые ошибки для ожидаемых ошибок ввода; не маскируй ошибки инфраструктуры общими успешными ответами.
+The default local workflow uses Docker Compose. Follow `README.md` for the current setup commands.
 
-## 6. База данных и миграции
+```bash
+cp .env.example .env
+# Set POSTGRES_PASSWORD in .env before starting.
+docker compose up -d --build
+docker compose exec backend dotnet ef database update
+```
 
-Текущие сущности: `Product`, `Category`, `ProductCategory`. В `Product` находятся SKU, бренд, характеристики, цена, остаток и URL изображения; категории иерархические, товар может относиться к нескольким категориям. Не переносить сюда без задачи отдельные модели вариантов/склада из других магазинов.
+Create an administrator interactively when needed:
 
-Перед расширением схемы проверь модели, `DbContext`, конфигурации EF Core, миграции, DTO, сервисы и Angular-типы. Определи типы, обязательность, отношения, индексы, уникальность, CHECK-ограничения и влияние на существующие записи.
+```bash
+docker compose run --rm backend dotnet run --no-launch-profile -- create-admin
+```
 
-- Применённые миграции не редактировать и не переписывать; изменения оформлять новыми миграциями.
-- Не удалять и не пересоздавать БД, не очищать таблицы и не выполнять data migrations без явного согласования.
-- Проверяй сохранность существующих данных, обратную совместимость и риск простоя production.
-- Изменение схемы не означает разрешение выполнять `dotnet ef database update` или другие операции записи в БД.
+Seed categories; load demonstration products only when explicitly needed:
 
-## 7. Angular и интерфейс
+```bash
+docker compose run --rm backend dotnet run --no-launch-profile -- seed
+docker compose run --rm backend dotnet run --no-launch-profile -- seed-demo
+```
 
-- Используй standalone-компоненты, `OnPush`, строгие TypeScript-типы, signals где уместно, reactive forms и `@if`/`@for`.
-- Пользуйся существующими API-сервисами, guards/interceptors, маршрутизацией, Tailwind и daisyUI. Angular Material/CDK уже присутствуют; не вводи новые UI-зависимости без согласования.
-- Следуй существующему способу организации TS/HTML/SCSS. Не проводи массовых изменений шаблонов или структуры ради стилистических предпочтений.
-- Для функций предусмотри загрузку, ошибки, пустые состояния, валидацию и доступность, исходя из реального API. Не подменяй реальные данные моками без задачи.
-- Разделяй функциональные и визуальные изменения. Если задача только на дизайн, не меняй API, состояние, маршруты, валидацию и бизнес-логику; необходимые функциональные правки согласовывай отдельно.
-- Сохраняй существующую стратегию CSR; SSR/SSG, глобальное состояние и новые библиотеки — отдельные обоснованные решения.
-- Для публичных страниц учитывай адаптивность, SEO, действительные контакты и корректные ссылки. Не заменяй реальные сведения заглушками.
-- Не создавай и не изменяй Angular `*.spec.ts` и тестовую конфигурацию без отдельного решения.
+Local URLs with the default `.env.example` ports:
 
-## 8. Авторизация, секреты и окружения
+- Frontend: `http://localhost:4200/`
+- Backend Swagger: `http://localhost:5027/swagger`
+- PostgreSQL host port: `127.0.0.1:5434`
 
-- Авторизация администратора основана на Supabase Auth/JWT; frontend передаёт токен через interceptor, backend применяет `AdminOnly`. Не заменяй серверные проверки frontend guard.
-- Не меняй JWT validation, CORS, роли, правила доступа, Supabase и production-конфигурацию без анализа последствий и согласования.
-- Не выводи секреты в ответах, логах и diff; не помещай пароли, ключи подписи, строку подключения или service-role credentials в Git. Публичный Supabase anon key не приравнивай автоматически к серверному секрету.
-- Не подключайся к production-БД и не выполняй изменяющие запросы к удалённым сервисам без разрешения. Не считай локальные настройки подтверждением production.
-- Не меняй существующую схему `environment.apiBaseUrl` и сетевую конфигурацию на подход другого проекта без отдельной задачи.
+The API and database are local development services, not a production deployment. The commands above are documentation, not permission for an agent to run them automatically.
 
-## 9. Команды: разрешения и проверки
+## 4. Core working rules
 
-Без отдельного разрешения допустимы безопасные операции чтения, например:
+- Work strictly within the approved task. First identify the goal, current behavior, expected behavior, affected components, and acceptance criteria.
+- Before implementation, inspect the current branch, working tree, relevant files, nearby examples, and actual API/database contracts.
+- Do not write code from assumptions or invent models, fields, routes, permissions, payload keys, statuses, or behavior.
+- Do not add unrelated refactoring, cleanup, optimization, UI changes, dependencies, abstractions, or features.
+- Do not add broad `try/catch`, fallback behavior, unnecessary null guards, or alternative flows without a demonstrated requirement. Implement necessary validation and error handling.
+- Prefer straightforward, maintainable changes using existing project conventions. Larger cross-layer changes are appropriate when the task requires them.
+- For a new table, migration, API contract, dependency, authentication change, or architectural approach, explain the need, compatibility impact, and risks; obtain approval for the approach before implementation.
+- Preserve unrelated and uncommitted changes. Never overwrite someone else's work or perform speculative cleanup.
+- If important information is missing, identify the exact file, schema, contract, or safe runtime observation needed.
+- Do not automatically agree with a weak proposal. Recommend one preferred approach, explain the trade-offs briefly, and leave final technical decisions to the user.
 
-- `pwd`, `ls`, `find`, `rg`, `grep`, `cat`, `sed`;
-- `git status`, `git diff`, `git diff --check`, `git log`, `git branch --show-current`;
-- чтение конфигураций и локальных файлов без вывода секретов.
+## 5. Codex workflow and review
 
-**Сначала получи явное разрешение** на команды, меняющие состояние, в том числе:
+1. Read the task and these instructions.
+2. Inspect `git status --short`, `git branch --show-current`, relevant diffs, files, and analogous implementations before editing.
+3. For non-trivial tasks, outline the smallest complete solution, affected layers, compatibility risks, and required decisions.
+4. Edit only approved, relevant files; preserve established behavior outside the task.
+5. Review the final diff and run only permitted checks. Request approval before state-changing checks or commands.
+6. Report changed files, implemented behavior, actual verification, unverified areas, and remaining risks.
 
-- Git: `add`, `commit`, `push`, `pull`, `fetch`, `merge`, `rebase`, `checkout`, `switch`, `reset`, `clean`, `stash`;
-- установку/обновление зависимостей: `npm install/ci/update`, `dotnet restore`, обновление пакетов;
-- миграции EF Core, сидирование, операции записи/удаления в БД;
-- сборки и тесты: `dotnet build/test`, `ng build/test`, `npm run build`, изменение тестов;
-- запуск/остановку сервисов, деплой, изменение Railway/Supabase и production.
+For reviews, inspect the real diff rather than accepting an implementation report. Classify findings as blocking issues, optional improvements, or open questions. Cite specific files and lines when possible. State one verdict: **ready to accept**, **changes required**, or **insufficient information**. The user decides whether to merge.
 
-Команды из README — не разрешение на их автоматический запуск. Для локального frontend используется Angular CLI (`npm run ng -- serve`); текущий `npm start` запускает статическую production-сборку, а не Angular dev server. Backend локально запускается через `dotnet run --launch-profile http`. Эти команды — справка, выполняй их только после согласования.
+Do not claim that a build, test, migration, API call, or production verification passed unless it was actually performed and the result was observed.
 
-Если команда потенциально модифицирует файлы, кэш, контейнеры, БД или удалённые ресурсы, сначала спроси разрешение. Не выполняй разрушительные команды для «очистки» окружения.
+## 6. Command permissions
 
-## 10. Ревью и итоговый отчёт
+Allowed without additional approval when safe and relevant:
 
-При ревью проверяй реальные изменения и связанные контракты. Делай выводы по коду, а не по описанию автора. Разделяй блокирующие замечания, необязательные улучшения и вопросы; указывай файлы и строки. Вердикт: «можно принимать», «нужны исправления» или «недостаточно данных». Решение о merge принимает пользователь.
+- File inspection: `pwd`, `ls`, `find`, `rg`, `grep`, `cat`, `sed`.
+- Read-only Git: `git status`, `git diff`, `git diff --check`, `git log`, `git branch --show-current`, `git ls-files`.
+- Read-only Docker discovery: `docker ps`, `docker compose ps`, `docker image ls`, `docker volume ls`, and targeted logs; do not expose credentials in output.
+- Local read-only configuration checks and read-only database queries, only when the target and side effects are understood.
 
-После выполнения задачи кратко перечисли:
+Require explicit user approval before:
 
-1. Изменённые файлы и суть изменений.
-2. Выполненные проверки и результаты — только фактически запущенные.
-3. Что не проверялось (сборка, тесты, runtime, БД, production).
-4. Остаточные риски и вопросы, если они есть.
+- Git state changes: `add`, `commit`, `push`, `fetch`, `pull`, `merge`, `rebase`, `checkout`, `switch`, branch creation, `reset`, `clean`, or `stash`.
+- Dependency installs or updates: `npm install`, `npm ci`, `npm update`, `dotnet restore`, package upgrades, or tool installations.
+- Builds, tests, formatters that write files, generated code, or test-file modifications.
+- EF Core migration creation/application, seeding, database writes, resets, restores, or deletions.
+- Starting, stopping, rebuilding, pruning, or deleting Docker containers, images, networks, or volumes.
+- Deployment, production access, external service changes, or changes to GitHub and other remote systems.
 
-Общайся по-русски, конкретно и без лишней теории. Не соглашайся автоматически с сомнительными решениями. Для нескольких вариантов рекомендуй один с кратким обоснованием.
+An explicit request to implement a feature permits the required source-code edits, but does not automatically authorize the commands above. When a command could alter files, caches, databases, running services, or remote state, request approval first. Never use broad Docker pruning or destructive database commands as routine cleanup.
+
+Do not add, modify, restore, or run Angular `*.spec.ts` tests without a separate explicit task. Do not modify the Angular test configuration merely to support ordinary feature work.
+
+## 7. Backend and API conventions
+
+Keep the existing `Domain / Application / Infrastructure / WebApi` separation unless a task explicitly justifies changing it. Use existing service, repository, AutoMapper, FluentValidation, and dependency-injection patterns. Do not introduce new patterns for simple CRUD without a concrete need.
+
+Keep controllers focused on HTTP input, validation, service calls, and responses; keep domain/application behavior in the appropriate existing layer. Check request/response DTOs, mappings, validators, consumers, and error responses before changing an API contract.
+
+Current routes include:
+
+- Public product reads: `GET /api/Products`, `GET /api/Products/{id}`.
+- Public category reads: `GET /api/Categories`, `GET /api/Categories/{id}`, `GET /api/Categories/tree`.
+- Product and category `POST`, `PUT`, and `DELETE` operations are protected by `AdminOnly`.
+- Authentication: `GET /api/auth/csrf`, `GET /api/auth/me`, `POST /api/auth/login`, `POST /api/auth/logout`.
+
+Verify the actual controller and service implementation before assuming query parameters, filters, response shapes, or error semantics. Frontend usage alone does not establish backend support. Preserve authorization, server-side validation, and appropriate HTTP error handling.
+
+## 8. Authentication and security
+
+- Authentication uses ASP.NET Core Identity (`IdentityUser`, `IdentityRole`) and a server-managed cookie session, not Supabase Auth or JWT bearer tokens.
+- Administrative endpoints require the `AdminOnly` policy and the `Admin` role; Angular guards are only a UX convenience, not a security boundary.
+- The existing antiforgery flow uses `GET /api/auth/csrf`, the `XSRF-TOKEN` cookie, and the `X-XSRF-TOKEN` request header. Preserve CSRF protection on state-changing requests.
+- There is no public account registration. Administrators are created using the interactive `create-admin` command.
+- Identity settings, cookie security, CORS, rate limiting, session handling, authorization policies, and Data Protection keys are security-sensitive. Do not change them incidentally.
+- Never commit or disclose passwords, connection strings, tokens, private keys, database dumps, or credentials.
+- Do not reintroduce Supabase, Railway, Cloudflare deployment integration, external authentication, or hosting configuration without a specific task and approval.
+- Keep local and production environments distinct. Do not assume the current local Docker configuration is production-ready.
+
+## 9. Database and migrations
+
+PostgreSQL is managed locally by Docker Compose. EF Core's `AppDbContext` extends `IdentityDbContext`.
+
+Current catalog entities:
+
+- `Product` — SKU, name, brand, characteristics, price, currency, stock quantity, and optional image URL.
+- `Category` — hierarchical catalog categories.
+- `ProductCategory` — many-to-many product/category relation.
+- Identity users and roles are stored in the same database.
+
+Do not copy the separate product-variant, inventory, or attribute architecture of another project without a PaintShop requirement.
+
+Before changing the schema, inspect entities, DbContext, EF configurations, existing migrations, repositories, DTOs, frontend types, and existing data. Define required/nullable fields, relationships, defaults, unique constraints, indexes, validation, and any data migration or backfill.
+
+- Never edit migration history that may already have been applied; add a new migration for schema changes.
+- Do not reset, truncate, restore, replace, or migrate a database without explicit approval.
+- Treat seed data as deliberate writes. The category seed is separate from the optional development-only demo-product seed.
+- Assess data preservation and backward compatibility before schema or API changes.
+
+## 10. Frontend conventions
+
+Follow the Angular code already in this repository:
+
+- Standalone components, `ChangeDetectionStrategy.OnPush`, strict TypeScript typing, signals where appropriate, reactive forms, and built-in `@if` / `@for` control flow.
+- Existing routing, API services, models, guards, interceptors, and component structure.
+- Tailwind CSS and daisyUI; Angular Material/CDK are already available. Do not add a design system or dependency solely on a tool's suggestion.
+- Keep TypeScript, HTML, and SCSS organization consistent with nearby components. Do not restructure unrelated components for style uniformity.
+- Use the real backend contract and handle loading, empty, error, authorization, and validation states as needed by the task.
+- Preserve accessibility, responsive behavior, SEO metadata, links, and verified store contact details on public pages.
+- The current application is CSR. SSR/SSG, hydration, a new state-management library, or a new frontend architecture requires a separate justified decision.
+
+Frontend API calls use relative `/api/...` paths through the existing environment configuration and development proxy (`PaintShopFrontEnd/proxy.conf.json` targets `http://backend:8080`). Do not hard-code Docker hostnames or localhost backend URLs in Angular application code.
+
+Separate functional changes from visual design changes:
+
+- A functional task may change routing, types, services, state, forms, validation, and the markup required to make the feature work.
+- A design-only task may change layout, styling, presentation, and visual accessibility, but must preserve API contracts, routes, state, validation, and business behavior.
+- If design requires functional or architectural changes, explain and agree on those changes first.
+- Do not let design tools replace Angular with another framework or introduce unrelated dependencies.
+
+## 11. Docker, environments, and data safety
+
+`compose.yaml` defines `db`, `backend`, and `frontend`. Host ports are bound to localhost by default. The PostgreSQL data volume and ASP.NET Core Data Protection keys volume are persistent project data, not temporary build artifacts.
+
+- Keep `.env` and credentials out of Git; maintain `.env.example` as a safe template.
+- Never delete volumes or reset the database merely to obtain a clean environment.
+- Do not prune Docker resources globally or touch unrelated projects.
+- Check actual container/image ownership before removing build artifacts.
+- The current Docker setup is for local development. Production deployment and hosting decisions are separate tasks.
+- Do not claim a clean-clone setup or production runtime has been verified unless those workflows were actually tested.
+
+## 12. Final report
+
+After each implementation or review, report briefly:
+
+1. Changed files and what changed.
+2. Checks actually performed and their results.
+3. Checks not performed (build, tests, migrations, runtime, database, production) where relevant.
+4. Remaining risks, compatibility concerns, or required user decisions.
+
+Use precise, evidence-based communication. Avoid unnecessary theory, speculation presented as fact, and reports of work that was not performed.
