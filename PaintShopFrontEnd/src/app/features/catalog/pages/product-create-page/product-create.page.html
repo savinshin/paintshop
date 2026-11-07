@@ -93,30 +93,19 @@
               </span>
             </label>
 
-            <label class="form-control md:col-span-2">
-              <span class="label-text">Подкатегории</span>
-
-              <select
-                multiple
-                size="8"
-                class="category-multiselect"
+            <div class="form-control md:col-span-2">
+              <app-category-multiselect
+                label="Подкатегории"
+                [options]="childCategories()"
                 formControlName="categoryIds"
-                (change)="clearFieldError('categoryIds')"
-                [disabled]="selectedRootId() == null"
-              >
-                @for (c of childCategories(); track c.id) {
-                  <option [ngValue]="c.id" [attr.title]="c.label">{{ c.label }}</option>
-                }
-              </select>
+                [selectionDisabled]="selectedRootId() == null"
+                (selectionChange)="clearFieldError('categoryIds')"
+              />
 
               @if (selectedRootId() == null) {
                 <span class="text-xs opacity-70 mt-1">Сначала выберите категорию.</span>
-              } @else {
-                <span class="text-xs opacity-70 mt-1">
-                  Зажмите Ctrl (Cmd) для выбора нескольких подкатегорий.
-                </span>
               }
-            </label>
+            </div>
 
             <label class="form-control">
               <span class="label-text">HEX-цвет (#RRGGBB)</span>

@@ -1,0 +1,43 @@
+<div class="category-multiselect">
+  <span class="label-text" [id]="labelId">{{ label }}</span>
+  <button
+    #trigger
+    type="button"
+    class="category-multiselect__trigger"
+    [disabled]="isDisabled()"
+    [attr.aria-labelledby]="labelId + ' ' + countId"
+    [attr.aria-expanded]="isOpen()"
+    [attr.aria-controls]="panelId"
+    (click)="toggle()"
+  >
+    <span [id]="countId">Выбрано: {{ selectedIds().size }}</span>
+    <span aria-hidden="true">{{ isOpen() ? '▲' : '▼' }}</span>
+  </button>
+
+  <div
+    class="category-multiselect__panel"
+    [id]="panelId"
+    [hidden]="!isOpen()"
+    role="group"
+    [attr.aria-labelledby]="labelId"
+  >
+    <div class="category-multiselect__options">
+      @for (option of options; track option.id) {
+        <label class="category-multiselect__option">
+          <input
+            #checkbox
+            type="checkbox"
+            class="checkbox checkbox-sm"
+            [checked]="selectedIds().has(option.id)"
+            [disabled]="isDisabled()"
+            (change)="onSelectionChange(option.id, checkbox.checked)"
+          />
+          <span>{{ option.label }}</span>
+        </label>
+      } @empty {
+        <p class="category-multiselect__empty">Нет доступных категорий.</p>
+      }
+    </div>
+    <button type="button" class="btn btn-ghost btn-sm" (click)="close()">Готово</button>
+  </div>
+</div>

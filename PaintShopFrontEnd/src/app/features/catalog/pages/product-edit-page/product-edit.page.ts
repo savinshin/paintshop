@@ -13,11 +13,12 @@ import { SeoService } from '@core/services/seo.service';
 import { Product, UpdateProductRequest } from '@core/models/product.model';
 import { Category } from '@core/models/category.model';
 import { fieldError, optionalInteger, priceValidator, requiredTrimmed, validationErrors } from '../../forms/product-form.validation';
+import { CategoryMultiselectComponent } from '../../ui/category-multiselect/category-multiselect.component';
 
 @Component({
   standalone: true,
   selector: 'app-product-edit-page',
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink, CategoryMultiselectComponent],
   templateUrl: 'product-edit.page.html',
   styleUrl: 'product-edit.page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

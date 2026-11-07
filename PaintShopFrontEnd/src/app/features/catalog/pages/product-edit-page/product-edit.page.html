@@ -72,18 +72,15 @@
               @if (fieldError('stockQty'); as message) { <span class="text-xs opacity-70 mt-1">{{ message }}</span> }
             </label>
 
-            <label class="form-control md:col-span-2">
-              <span class="label-text">Категории</span>
-              <select multiple size="8" class="category-multiselect" formControlName="categoryIds" (change)="clearFieldError('categoryIds')">
-                @for (c of categoryOptions(); track c.id) {
-                  <option [ngValue]="c.id" [attr.title]="c.label">{{ c.label }}</option>
-                }
-              </select>
+            <div class="form-control md:col-span-2">
+              <app-category-multiselect
+                label="Категории"
+                [options]="categoryOptions()"
+                formControlName="categoryIds"
+                (selectionChange)="clearFieldError('categoryIds')"
+              />
               @if (fieldError('categoryIds'); as message) { <span class="text-xs opacity-70 mt-1">{{ message }}</span> }
-              <span class="text-xs opacity-70 mt-1">
-                Зажмите Ctrl (Cmd) для выбора нескольких категорий.
-              </span>
-            </label>
+            </div>
 
             <label class="form-control">
               <span class="label-text">HEX-цвет (#RRGGBB)</span>
