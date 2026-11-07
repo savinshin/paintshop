@@ -112,22 +112,21 @@ public class ProductService : IProductService
         if (!includeDescendants)
             return await _repo.GetByCategoryIdsAsync(new[] { categoryId }, query, cancellationToken);
 
-        var allCategories = (await _categoryRepo.GetAllAsync(cancellationToken)).ToList();
-        var ids = new List<int>();
-        CollectCategoryIds(categoryId, allCategories, ids);
+        var childrenByParent = (await _categoryRepo.GetAllAsync(cancellationToken))
+            .ToLookup(category => category.ParentId);
+        var ids = new HashSet<int>();
+        var pending = new Stack<int>();
+        pending.Push(categoryId);
+
+        while (pending.TryPop(out var currentId))
+        {
+            if (!ids.Add(currentId))
+                continue;
+
+            foreach (var child in childrenByParent[currentId])
+                pending.Push(child.Id);
+        }
 
         return await _repo.GetByCategoryIdsAsync(ids, query, cancellationToken);
-    }
-
-    private static void CollectCategoryIds(int rootId, List<Category> all, List<int> result)
-    {
-        if (result.Contains(rootId))
-            return;
-
-        result.Add(rootId);
-
-        var children = all.Where(c => c.ParentId == rootId).ToList();
-        foreach (var child in children)
-            CollectCategoryIds(child.Id, all, result);
     }
 }
