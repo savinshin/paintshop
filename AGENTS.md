@@ -156,9 +156,12 @@ Verify the actual controller and service implementation before assuming query pa
 - Do not reintroduce Supabase, Railway, Cloudflare deployment integration, external authentication, or hosting configuration without a specific task and approval.
 - Keep local and production environments distinct. Do not assume the current local Docker configuration is production-ready.
 
-## 9. Database and migrations
+
+## 9. Database, migrations, and seed data
 
 PostgreSQL is managed locally by Docker Compose. EF Core's `AppDbContext` extends `IdentityDbContext`.
+
+PaintShop is currently in pre-production development. The local database contains disposable development and demonstration data, not real business records. The schema is provisional and may be redesigned as store requirements evolve.
 
 Current catalog entities:
 
@@ -169,12 +172,38 @@ Current catalog entities:
 
 Do not copy the separate product-variant, inventory, or attribute architecture of another project without a PaintShop requirement.
 
-Before changing the schema, inspect entities, DbContext, EF configurations, existing migrations, repositories, DTOs, frontend types, and existing data. Define required/nullable fields, relationships, defaults, unique constraints, indexes, validation, and any data migration or backfill.
+Before changing the schema, inspect entities, DbContext, EF configurations, migration history, repositories, DTOs, frontend consumers, and the target database. Define field types, nullability, relationships, defaults, uniqueness, indexes, constraints, and validation.
 
-- Never edit migration history that may already have been applied; add a new migration for schema changes.
-- Do not reset, truncate, restore, replace, or migrate a database without explicit approval.
-- Treat seed data as deliberate writes. The category seed is separate from the optional development-only demo-product seed.
-- Assess data preservation and backward compatibility before schema or API changes.
+### Pre-production migration strategy
+
+- Prefer a clean final schema over accumulating incremental migrations for temporary development changes.
+- Existing development migrations may be replaced, consolidated, or regenerated when justified by schema changes.
+- For disposable databases, prefer regenerating a coherent migration baseline and recreating the schema rather than manually editing isolated historical migration files.
+- Keep migration files, generated metadata, and `AppDbContextModelSnapshot` consistent.
+- The final migration baseline must create the complete required schema, including ASP.NET Core Identity tables, from an empty database.
+- Do not preserve obsolete intermediate schema changes solely for compatibility with disposable development databases.
+- Do not reset a database for unrelated cleanup or without a concrete schema-related reason.
+- Before any destructive operation, verify the exact database, Docker Compose project, and affected data. Coordinate with other developers if their environments may be affected.
+- Database drops, resets, migration regeneration/application, and seeding require explicit user approval. Never infer permission from the general pre-production policy.
+- Never delete PostgreSQL or Data Protection Docker volumes as routine schema-reset operations. Preserve unrelated databases, containers, and volumes.
+- When recreating a database, account for development administrator accounts, Identity data, and required seed data.
+- Verify that the final migrations can create a fresh database and that the required seeders work afterward, using only approved checks.
+
+### Seed data
+
+- `CategorySeeder.cs` contains the real store category taxonomy and may be updated as business requirements change.
+- The category seeder must remain safe to rerun and is intended for initial catalog setup, including future production deployment once the taxonomy is approved.
+- `DemoProductSeeder.cs` contains disposable demonstration products for development and testing only. It must never run as part of production setup.
+- Seeders populate data; EF Core migrations define the database schema.
+- Do not invent store categories, brands, or products without confirmed requirements. Keep real reference data separate from demonstration data.
+- Seed execution and database writes always require explicit user approval.
+
+### After real data exists
+
+- Once a database contains real business data or a shared deployment must preserve its state, stop rewriting migrations already applied to that database.
+- From that point onward, use new forward migrations and plan data preservation, compatibility, rollback, and deployment.
+- Never reset production data or rewrite production-applied migration history.
+- Reassess this pre-production policy before the first production deployment.
 
 ## 10. Frontend conventions
 
@@ -197,12 +226,22 @@ Separate functional changes from visual design changes:
 - If design requires functional or architectural changes, explain and agree on those changes first.
 - Do not let design tools replace Angular with another framework or introduce unrelated dependencies.
 
+### Division of responsibilities
+
+- The primary developer owns database design, backend functionality, API contracts, Angular business logic, routing, state management, and functional markup.
+- The design contributor owns visual HTML/CSS refinements, responsive presentation, photographs, icons, banners, logos, and other visual assets.
+- Functional changes may include the necessary HTML structure, but should preserve the existing visual style and avoid unrelated redesigns.
+- Design-only changes must preserve Angular behavior, routing, bindings, API contracts, validation, and application state.
+- Coordinate dependencies: complete and publish required functional changes before visual work that depends on them.
+- Do not modify another contributor's visual work incidentally during functional tasks.
+
 ## 11. Docker, environments, and data safety
 
 `compose.yaml` defines `db`, `backend`, and `frontend`. Host ports are bound to localhost by default. The PostgreSQL data volume and ASP.NET Core Data Protection keys volume are persistent project data, not temporary build artifacts.
 
 - Keep `.env` and credentials out of Git; maintain `.env.example` as a safe template.
-- Never delete volumes or reset the database merely to obtain a clean environment.
+- Development database resets are allowed for approved schema redesigns before real business data exists, but only after verifying the exact target and obtaining explicit permission.
+- Prefer resetting only the intended database or schema. Preserve PostgreSQL and Data Protection volumes unless their deletion is separately justified and explicitly approved.
 - Do not prune Docker resources globally or touch unrelated projects.
 - Check actual container/image ownership before removing build artifacts.
 - The current Docker setup is for local development. Production deployment and hosting decisions are separate tasks.
