@@ -5,6 +5,7 @@ using PaintShopBackEnd.Application.Commands.Products;
 using PaintShopBackEnd.Application.Interfaces;
 using PaintShopBackEnd.WebApi.Models.Products;
 using Microsoft.AspNetCore.Authorization;
+using PaintShopBackEnd.Domain.Exceptions;
 
 namespace PaintShopBackEnd.WebApi.Controllers
 {
@@ -25,11 +26,12 @@ namespace PaintShopBackEnd.WebApi.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ProductResponse>>> GetProducts(
             [FromQuery] int? categoryId,
-            [FromQuery] bool includeDescendants = false)
+            [FromQuery] bool includeDescendants = false,
+            [FromQuery] string? q = null)
         {
             var items = categoryId.HasValue
-                ? await _service.GetByCategoryAsync(categoryId.Value, includeDescendants)
-                : await _service.GetAllAsync();
+                ? await _service.GetByCategoryAsync(categoryId.Value, includeDescendants, q)
+                : await _service.GetAllAsync(q);
 
             return Ok(_mapper.Map<IEnumerable<ProductResponse>>(items));
         }
@@ -58,10 +60,20 @@ namespace PaintShopBackEnd.WebApi.Controllers
                 return ValidationProblem(ModelState);
             }
 
-            var command = _mapper.Map<CreateProductCommand>(request);
-            var created = await _service.CreateAsync(command);
-            var dto = _mapper.Map<ProductResponse>(created);
-            return CreatedAtRoute("GetProductById", new { id = created.Id }, dto);
+            if (await _service.SkuExistsAsync(request.sku, null, HttpContext.RequestAborted))
+                return DuplicateSku();
+
+            try
+            {
+                var command = _mapper.Map<CreateProductCommand>(request);
+                var created = await _service.CreateAsync(command);
+                var dto = _mapper.Map<ProductResponse>(created);
+                return CreatedAtRoute("GetProductById", new { id = created.Id }, dto);
+            }
+            catch (DuplicateSkuException)
+            {
+                return DuplicateSku();
+            }
         }
 
         [Authorize(Policy = "AdminOnly")]
@@ -80,13 +92,27 @@ namespace PaintShopBackEnd.WebApi.Controllers
                 return ValidationProblem(ModelState);
             }
 
-            var command = _mapper.Map<UpdateProductCommand>(request);
-            command.Id = id; // из роутинга
+            if (await _service.SkuExistsAsync(request.sku, id, HttpContext.RequestAborted))
+                return DuplicateSku();
 
-            var updated = await _service.UpdateAsync(id, command);
-            if (updated == null) return NotFound();
+            try
+            {
+                var command = _mapper.Map<UpdateProductCommand>(request);
+                command.Id = id;
+                var updated = await _service.UpdateAsync(id, command);
+                if (updated == null) return NotFound();
+                return Ok(_mapper.Map<ProductResponse>(updated));
+            }
+            catch (DuplicateSkuException)
+            {
+                return DuplicateSku();
+            }
+        }
 
-            return Ok(_mapper.Map<ProductResponse>(updated));
+        private ActionResult DuplicateSku()
+        {
+            ModelState.AddModelError("sku", "Товар с таким артикулом уже существует.");
+            return ValidationProblem(ModelState);
         }
 
         [Authorize(Policy = "AdminOnly")]

@@ -13,3 +13,19 @@ export interface Product {
   categoryIds?: number[] | null;
   createdAt?: string | null;
 }
+
+export interface CreateProductRequest {
+  sku: string;
+  name: string;
+  brand: string;
+  finish: string | null;
+  packageMl: number | null;
+  price: number | null;
+  currency: string | null;
+  stockQty: number | null;
+  hex: string | null;
+  imageUrl: string | null;
+  categoryIds: number[];
+}
+
+export type UpdateProductRequest = CreateProductRequest;

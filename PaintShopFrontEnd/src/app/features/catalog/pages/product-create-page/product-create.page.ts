@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 
 import { Router, RouterLink } from '@angular/router';
-import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { finalize } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 
@@ -10,8 +10,9 @@ import { CategoryService } from '@core/services/category.service';
 import { AuthService } from '@core/services/auth.service';
 import { SeoService } from '@core/services/seo.service';
 
-import { Product } from '@core/models/product.model';
+import { CreateProductRequest } from '@core/models/product.model';
 import { Category } from '@core/models/category.model';
+import { fieldError, optionalInteger, priceValidator, requiredTrimmed, validationErrors } from '../../forms/product-form.validation';
 
 @Component({
   standalone: true,
@@ -36,6 +37,8 @@ export class ProductCreatePageComponent implements OnInit {
   readonly error = signal<string | null>(null);
 
   readonly categories = signal<Category[]>([]);
+  readonly categoriesLoaded = signal(false);
+  readonly serverErrors = signal<Record<string, string[]>>({});
   readonly selectedRootId = signal<number | null>(null);
 
   private readonly sortCategories = (a: Category, b: Category) =>
@@ -59,16 +62,16 @@ export class ProductCreatePageComponent implements OnInit {
   });
 
   readonly form = this.fb.nonNullable.group({
-    name: [''],
-    brand: [''],
-    sku: [''],
-    finish: [''],
-    packageMl: [null as number | null],
-    price: [null as number | null],
-    currency: [''],
-    stockQty: [null as number | null],
-    hex: [''],
-    imageUrl: [''],
+    name: ['', requiredTrimmed(256)],
+    brand: ['', requiredTrimmed(128)],
+    sku: ['', requiredTrimmed(64)],
+    finish: ['', Validators.maxLength(64)],
+    packageMl: [null as number | null, optionalInteger(1)],
+    price: ['', priceValidator],
+    currency: ['', Validators.maxLength(8)],
+    stockQty: [null as number | null, optionalInteger(0)],
+    hex: ['', Validators.maxLength(16)],
+    imageUrl: ['', Validators.maxLength(1024)],
     categoryIds: [[] as number[]],
   });
 
@@ -86,7 +89,10 @@ export class ProductCreatePageComponent implements OnInit {
       .getAll()
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
-        next: (list) => this.categories.set(list),
+        next: (list) => {
+          this.categories.set(list);
+          this.categoriesLoaded.set(true);
+        },
         error: () => {
           this.categories.set([]);
           this.selectedRootId.set(null);
@@ -102,8 +108,24 @@ export class ProductCreatePageComponent implements OnInit {
     this.form.patchValue({ categoryIds: [] });
   }
 
+  fieldError(name: string): string | null {
+    return fieldError(this.form, name, this.serverErrors());
+  }
+
+  clearFieldError(name: string): void {
+    this.serverErrors.update((errors) => {
+      const updated = { ...errors };
+      delete updated[name];
+      return updated;
+    });
+  }
+
   onSubmit(): void {
-    if (!this.isAdmin() || this.form.invalid || this.saving()) return;
+    if (!this.isAdmin() || !this.categoriesLoaded() || this.saving()) return;
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
 
     const v = this.form.getRawValue();
 
@@ -116,20 +138,21 @@ export class ProductCreatePageComponent implements OnInit {
     }
 
     if (categoryIds.length === 0) {
-      this.error.set('Выберите категорию.');
+      this.serverErrors.update((errors) => ({ ...errors, categoryIds: ['Выберите категорию.'] }));
       return;
     }
 
     this.saving.set(true);
     this.error.set(null);
+    this.serverErrors.set({});
 
-    const payload: Partial<Product> = {
-      name: v.name.trim() || null,
-      brand: v.brand.trim() || null,
-      sku: v.sku.trim() || null,
+    const payload: CreateProductRequest = {
+      name: v.name.trim(),
+      brand: v.brand.trim(),
+      sku: v.sku.trim(),
       finish: v.finish.trim() || null,
       packageMl: v.packageMl,
-      price: v.price,
+      price: v.price.trim() ? Number(v.price.trim().replace(',', '.')) : null,
       currency: v.currency.trim() || null,
       stockQty: v.stockQty,
       hex: v.hex.trim() || null,
@@ -145,6 +168,12 @@ export class ProductCreatePageComponent implements OnInit {
         error: (err: HttpErrorResponse) => {
           if (err.status === 401 || err.status === 403) {
             this.error.set('Недостаточно прав. Войдите как администратор на странице /login.');
+            return;
+          }
+          if (err.status === 400) {
+            const result = validationErrors(err, this.form);
+            this.serverErrors.set(result.fields);
+            this.error.set(result.other.join(' ') || (Object.keys(result.fields).length ? 'Проверьте указанные поля.' : 'Проверьте данные товара.'));
             return;
           }
           this.error.set('Не удалось создать товар. Попробуйте ещё раз.');

@@ -43,18 +43,13 @@ export const routes: Routes = [
         title: 'Вход для администратора',
       },
       {
-        path: 'avtoparts',
-        redirectTo: 'catalog',
-        pathMatch: 'full',
-      },
-      {
-        path: 'podbor-kraski',
+        path: 'paint-matching',
         loadComponent: () =>
           import('./features/podbor-kraski/pages/podbor-kraski-page/podbor-kraski.page').then(m => m.PodborKraskiPageComponent),
         title: 'Подбор краски',
       },
       {
-        path: 'cuz-remont',
+        path: 'body-repair',
         loadComponent: () =>
           import('./features/cuz-remont/pages/cuz-remont-page/cuz-remont.page').then(m => m.CuzRemontPageComponent),
         title: 'Кузовной ремонт',

@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { finalize } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 
@@ -10,8 +10,9 @@ import { CategoryService } from '@core/services/category.service';
 import { AuthService } from '@core/services/auth.service';
 import { SeoService } from '@core/services/seo.service';
 
-import { Product } from '@core/models/product.model';
+import { Product, UpdateProductRequest } from '@core/models/product.model';
 import { Category } from '@core/models/category.model';
+import { fieldError, optionalInteger, priceValidator, requiredTrimmed, validationErrors } from '../../forms/product-form.validation';
 
 @Component({
   standalone: true,
@@ -37,21 +38,24 @@ export class ProductEditPageComponent implements OnInit {
   readonly error = signal<string | null>(null);
 
   readonly categories = signal<Category[]>([]);
+  readonly categoriesLoaded = signal(false);
+  readonly productLoaded = signal(false);
+  readonly serverErrors = signal<Record<string, string[]>>({});
 
   private product: Product | null = null;
   private id = '';
 
   readonly form = this.fb.nonNullable.group({
-    name: [''],
-    brand: [''],
-    sku: [''],
-    finish: [''],
-    packageMl: [null as number | null],
-    price: [null as number | null],
-    currency: [''],
-    stockQty: [null as number | null],
-    hex: [''],
-    imageUrl: [''],
+    name: ['', requiredTrimmed(256)],
+    brand: ['', requiredTrimmed(128)],
+    sku: ['', requiredTrimmed(64)],
+    finish: ['', Validators.maxLength(64)],
+    packageMl: [null as number | null, optionalInteger(1)],
+    price: ['', priceValidator],
+    currency: ['', Validators.maxLength(8)],
+    stockQty: [null as number | null, optionalInteger(0)],
+    hex: ['', Validators.maxLength(16)],
+    imageUrl: ['', Validators.maxLength(1024)],
     categoryIds: [[] as number[]],
   });
 
@@ -75,7 +79,10 @@ export class ProductEditPageComponent implements OnInit {
     this.categoriesSvc
       .getAll()
       .subscribe({
-        next: (list) => this.categories.set(list),
+        next: (list) => {
+          this.categories.set(list);
+          this.categoriesLoaded.set(true);
+        },
         error: () => {
           this.categories.set([]);
           this.error.update((current) => current ?? 'Не удалось загрузить категории.');
@@ -93,13 +100,14 @@ export class ProductEditPageComponent implements OnInit {
       .subscribe({
         next: (p) => {
           this.product = p;
+          this.productLoaded.set(true);
           this.form.patchValue({
             name: p.name ?? '',
             brand: p.brand ?? '',
             sku: p.sku ?? '',
             finish: p.finish ?? '',
             packageMl: p.packageMl ?? null,
-            price: p.price ?? null,
+            price: p.price != null ? String(p.price) : '',
             currency: p.currency ?? '',
             stockQty: p.stockQty ?? null,
             hex: p.hex ?? '',
@@ -126,26 +134,42 @@ export class ProductEditPageComponent implements OnInit {
       });
   }
 
+  fieldError(name: string): string | null {
+    return fieldError(this.form, name, this.serverErrors());
+  }
+
+  clearFieldError(name: string): void {
+    this.serverErrors.update((errors) => {
+      const updated = { ...errors };
+      delete updated[name];
+      return updated;
+    });
+  }
+
   onSubmit(): void {
-    if (!this.isAdmin() || !this.product || this.form.invalid || this.saving()) return;
+    if (!this.isAdmin() || !this.product || !this.categoriesLoaded() || this.saving()) return;
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
 
     const v = this.form.getRawValue();
     if ((v.categoryIds?.length ?? 0) === 0) {
-      this.error.set('Выберите хотя бы одну категорию.');
+      this.serverErrors.update((errors) => ({ ...errors, categoryIds: ['Выберите хотя бы одну категорию.'] }));
       return;
     }
 
     this.saving.set(true);
     this.error.set(null);
+    this.serverErrors.set({});
 
-    const payload: Partial<Product> = {
-      ...this.product,
-      name: v.name.trim() || null,
-      brand: v.brand.trim() || null,
-      sku: v.sku.trim() || null,
+    const payload: UpdateProductRequest = {
+      name: v.name.trim(),
+      brand: v.brand.trim(),
+      sku: v.sku.trim(),
       finish: v.finish.trim() || null,
       packageMl: v.packageMl,
-      price: v.price,
+      price: v.price.trim() ? Number(v.price.trim().replace(',', '.')) : null,
       currency: v.currency.trim() || null,
       stockQty: v.stockQty,
       hex: v.hex.trim() || null,
@@ -161,6 +185,12 @@ export class ProductEditPageComponent implements OnInit {
         error: (err: HttpErrorResponse) => {
           if (err.status === 401 || err.status === 403) {
             this.error.set('Недостаточно прав. Войдите как администратор на странице /login.');
+            return;
+          }
+          if (err.status === 400) {
+            const result = validationErrors(err, this.form);
+            this.serverErrors.set(result.fields);
+            this.error.set(result.other.join(' ') || (Object.keys(result.fields).length ? 'Проверьте указанные поля.' : 'Проверьте данные товара.'));
             return;
           }
           this.error.set('Не удалось сохранить изменения. Попробуйте ещё раз.');

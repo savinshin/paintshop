@@ -26,51 +26,60 @@
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <label class="form-control">
               <span class="label-text">Название</span>
-              <input type="text" class="input input-bordered" formControlName="name" />
+              <input type="text" class="input input-bordered" formControlName="name" (input)="clearFieldError('name')" />
+              @if (fieldError('name'); as message) { <span class="text-xs opacity-70 mt-1">{{ message }}</span> }
             </label>
 
             <label class="form-control">
               <span class="label-text">Бренд</span>
-              <input type="text" class="input input-bordered" formControlName="brand" />
+              <input type="text" class="input input-bordered" formControlName="brand" (input)="clearFieldError('brand')" />
+              @if (fieldError('brand'); as message) { <span class="text-xs opacity-70 mt-1">{{ message }}</span> }
             </label>
 
             <label class="form-control">
               <span class="label-text">Артикул (SKU)</span>
-              <input type="text" class="input input-bordered" formControlName="sku" />
+              <input type="text" class="input input-bordered" formControlName="sku" (input)="clearFieldError('sku')" />
+              @if (fieldError('sku'); as message) { <span class="text-xs opacity-70 mt-1">{{ message }}</span> }
             </label>
 
             <label class="form-control">
               <span class="label-text">Финиш</span>
-              <input type="text" class="input input-bordered" formControlName="finish" />
+              <input type="text" class="input input-bordered" formControlName="finish" (input)="clearFieldError('finish')" />
+              @if (fieldError('finish'); as message) { <span class="text-xs opacity-70 mt-1">{{ message }}</span> }
             </label>
 
             <label class="form-control">
               <span class="label-text">Объём, мл</span>
-              <input type="number" class="input input-bordered" formControlName="packageMl" />
+              <input type="number" class="input input-bordered" formControlName="packageMl" (input)="clearFieldError('packageMl')" />
+              @if (fieldError('packageMl'); as message) { <span class="text-xs opacity-70 mt-1">{{ message }}</span> }
             </label>
 
             <label class="form-control">
               <span class="label-text">Цена</span>
-              <input type="number" class="input input-bordered" formControlName="price" />
+              <input type="text" inputmode="decimal" class="input input-bordered" formControlName="price" (input)="clearFieldError('price')" />
+              @if (fieldError('price'); as message) { <span class="text-xs opacity-70 mt-1">{{ message }}</span> }
             </label>
 
             <label class="form-control">
               <span class="label-text">Валюта</span>
-              <input type="text" class="input input-bordered" formControlName="currency" />
+              <input type="text" class="input input-bordered" formControlName="currency" (input)="clearFieldError('currency')" />
+              @if (fieldError('currency'); as message) { <span class="text-xs opacity-70 mt-1">{{ message }}</span> }
             </label>
 
             <label class="form-control">
               <span class="label-text">Количество на складе</span>
-              <input type="number" class="input input-bordered" formControlName="stockQty" />
+              <input type="number" class="input input-bordered" formControlName="stockQty" (input)="clearFieldError('stockQty')" />
+              @if (fieldError('stockQty'); as message) { <span class="text-xs opacity-70 mt-1">{{ message }}</span> }
             </label>
 
             <label class="form-control md:col-span-2">
               <span class="label-text">Категории</span>
-              <select multiple size="8" class="select select-bordered" formControlName="categoryIds">
+              <select multiple size="8" class="select select-bordered" formControlName="categoryIds" (change)="clearFieldError('categoryIds')">
                 @for (c of categories(); track c.id) {
                   <option [ngValue]="c.id">{{ getCategoryLabel(c) }}</option>
                 }
               </select>
+              @if (fieldError('categoryIds'); as message) { <span class="text-xs opacity-70 mt-1">{{ message }}</span> }
               <span class="text-xs opacity-70 mt-1">
                 Зажмите Ctrl (Cmd) для выбора нескольких категорий.
               </span>
@@ -78,12 +87,14 @@
 
             <label class="form-control">
               <span class="label-text">HEX-цвет (#RRGGBB)</span>
-              <input type="text" class="input input-bordered" formControlName="hex" />
+              <input type="text" class="input input-bordered" formControlName="hex" (input)="clearFieldError('hex')" />
+              @if (fieldError('hex'); as message) { <span class="text-xs opacity-70 mt-1">{{ message }}</span> }
             </label>
 
             <label class="form-control">
               <span class="label-text">URL изображения</span>
-              <input type="url" class="input input-bordered" formControlName="imageUrl" />
+              <input type="url" class="input input-bordered" formControlName="imageUrl" (input)="clearFieldError('imageUrl')" />
+              @if (fieldError('imageUrl'); as message) { <span class="text-xs opacity-70 mt-1">{{ message }}</span> }
             </label>
           </div>
 
@@ -94,7 +105,7 @@
           }
 
           <div class="mt-4 flex gap-2">
-            <button class="btn btn-primary" type="submit" [disabled]="saving()">
+            <button class="btn btn-primary" type="submit" [disabled]="saving() || !categoriesLoaded() || !productLoaded()">
               @if (!saving()) { <span>Сохранить</span> } @else { <span>Сохраняем…</span> }
             </button>
             <a class="btn btn-ghost" routerLink="/catalog">Отмена</a>

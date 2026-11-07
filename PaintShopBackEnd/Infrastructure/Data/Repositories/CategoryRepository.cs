@@ -22,6 +22,11 @@ namespace PaintShopBackEnd.Infrastructure.Data.Repositories
                 .ToListAsync();
         }
 
+        public async Task<bool> AllExistAsync(IReadOnlyCollection<int> ids, CancellationToken cancellationToken)
+        {
+            return await _context.Categories.CountAsync(c => ids.Contains(c.Id), cancellationToken) == ids.Count;
+        }
+
         public async Task<Category?> GetByIdAsync(int id)
         {
             return await _context.Categories
