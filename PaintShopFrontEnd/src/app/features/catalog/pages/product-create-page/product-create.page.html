@@ -99,13 +99,13 @@
               <select
                 multiple
                 size="8"
-                class="select select-bordered"
+                class="category-multiselect"
                 formControlName="categoryIds"
                 (change)="clearFieldError('categoryIds')"
                 [disabled]="selectedRootId() == null"
               >
                 @for (c of childCategories(); track c.id) {
-                  <option [ngValue]="c.id">{{ c.label }}</option>
+                  <option [ngValue]="c.id" [attr.title]="c.label">{{ c.label }}</option>
                 }
               </select>
 
@@ -141,7 +141,7 @@
             <button class="btn btn-primary" type="submit" [disabled]="saving() || !categoriesLoaded()">
               @if (!saving()) { <span>Создать</span> } @else { <span>Создаём…</span> }
             </button>
-            <a class="btn btn-ghost" routerLink="/catalog">Отмена</a>
+            <a class="btn btn-ghost" routerLink="/catalog/all">Отмена</a>
           </div>
         </form>
       }

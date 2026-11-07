@@ -58,7 +58,7 @@ export class LoginPageComponent implements OnInit {
       return;
     }
 
-    this.router.navigateByUrl('/catalog');
+    this.router.navigateByUrl('/catalog/all');
   }
 
   async onLogout(): Promise<void> {

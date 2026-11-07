@@ -16,9 +16,32 @@ export const routes: Routes = [
       },
       {
         path: 'catalog',
+        pathMatch: 'full',
+        loadComponent: () =>
+          import('./features/catalog/pages/catalog-index-page/catalog-index.page').then((m) => m.CatalogIndexPageComponent),
+        title: 'Каталог товаров',
+      },
+      {
+        path: 'catalog/auto-parts',
         loadComponent: () =>
           import('./features/catalog/pages/catalog-page/catalog.page').then((m) => m.CatalogPageComponent),
-        title: 'Каталог товаров',
+        data: { catalogMode: 'auto-parts' },
+        title: 'Автозапчасти — каталог',
+      },
+      {
+        path: 'catalog/materials',
+        loadComponent: () =>
+          import('./features/catalog/pages/catalog-page/catalog.page').then((m) => m.CatalogPageComponent),
+        data: { catalogMode: 'materials' },
+        title: 'Материалы — каталог',
+      },
+      {
+        path: 'catalog/all',
+        canMatch: [adminGuard],
+        loadComponent: () =>
+          import('./features/catalog/pages/catalog-page/catalog.page').then((m) => m.CatalogPageComponent),
+        data: { catalogMode: 'all' },
+        title: 'Все товары',
       },
       {
         path: 'catalog/new',

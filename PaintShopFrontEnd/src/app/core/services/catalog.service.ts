@@ -10,9 +10,12 @@ export class CatalogService {
   // private readonly baseUrl = '/api/Products';
   private readonly baseUrl = `${environment.apiBaseUrl}/api/Products`;
 
-  getProducts(q?: string): Observable<Product[]> {
+  getProducts(q?: string, categoryId?: number): Observable<Product[]> {
     let params = new HttpParams();
     if (q && q.trim()) params = params.set('q', q.trim());
+    if (categoryId != null) {
+      params = params.set('categoryId', categoryId).set('includeDescendants', true);
+    }
 
     return this.http.get<Product[]>(this.baseUrl, { params });
   }

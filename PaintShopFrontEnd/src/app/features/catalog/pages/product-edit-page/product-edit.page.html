@@ -74,9 +74,9 @@
 
             <label class="form-control md:col-span-2">
               <span class="label-text">Категории</span>
-              <select multiple size="8" class="select select-bordered" formControlName="categoryIds" (change)="clearFieldError('categoryIds')">
+              <select multiple size="8" class="category-multiselect" formControlName="categoryIds" (change)="clearFieldError('categoryIds')">
                 @for (c of categoryOptions(); track c.id) {
-                  <option [ngValue]="c.id">{{ c.label }}</option>
+                  <option [ngValue]="c.id" [attr.title]="c.label">{{ c.label }}</option>
                 }
               </select>
               @if (fieldError('categoryIds'); as message) { <span class="text-xs opacity-70 mt-1">{{ message }}</span> }
@@ -108,7 +108,7 @@
             <button class="btn btn-primary" type="submit" [disabled]="saving() || !categoriesLoaded() || !productLoaded()">
               @if (!saving()) { <span>Сохранить</span> } @else { <span>Сохраняем…</span> }
             </button>
-            <a class="btn btn-ghost" routerLink="/catalog">Отмена</a>
+            <a class="btn btn-ghost" routerLink="/catalog/all">Отмена</a>
           </div>
         </form>
       }

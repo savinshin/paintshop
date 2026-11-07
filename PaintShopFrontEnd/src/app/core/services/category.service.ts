@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { map, Observable } from 'rxjs';
-import { Category } from '../models/category.model';
+import { Category, CategoryTreeNode } from '../models/category.model';
 import { environment } from '@env/environment';
 
 @Injectable({ providedIn: 'root' })
@@ -17,15 +17,15 @@ export class CategoryService {
   /**
    * Вспомогательный метод, если понадобится дерево категорий.
    */
-  getTree() {
+  getTree(): Observable<CategoryTreeNode[]> {
     return this.getAll().pipe(
       map((list) => this.buildTree(list)),
     );
   }
 
-  private buildTree(list: Category[]) {
-    const byId = new Map<number, Category & { children: Category[] }>();
-    const roots: (Category & { children: Category[] })[] = [];
+  private buildTree(list: Category[]): CategoryTreeNode[] {
+    const byId = new Map<number, CategoryTreeNode>();
+    const roots: CategoryTreeNode[] = [];
 
     for (const c of list) {
       byId.set(c.id, { ...c, children: [] });
@@ -44,7 +44,7 @@ export class CategoryService {
       (a.sortOrder ?? 0) - (b.sortOrder ?? 0) || a.id - b.id;
 
     roots.sort(sortFn);
-    roots.forEach((r) => r.children.sort(sortFn));
+    for (const node of byId.values()) node.children.sort(sortFn);
 
     return roots;
   }

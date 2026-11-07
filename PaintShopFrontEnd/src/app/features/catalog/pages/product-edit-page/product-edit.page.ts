@@ -82,7 +82,7 @@ export class ProductEditPageComponent implements OnInit {
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) {
-      this.router.navigateByUrl('/catalog');
+      this.router.navigateByUrl('/catalog/all');
       return;
     }
 
@@ -201,7 +201,7 @@ export class ProductEditPageComponent implements OnInit {
       .updateProduct(this.id, payload)
       .pipe(finalize(() => this.saving.set(false)))
       .subscribe({
-        next: () => this.router.navigate(['/catalog']),
+        next: () => this.router.navigate(['/catalog/all']),
         error: (err: HttpErrorResponse) => {
           if (err.status === 401 || err.status === 403) {
             this.error.set('Недостаточно прав. Войдите как администратор на странице /login.');

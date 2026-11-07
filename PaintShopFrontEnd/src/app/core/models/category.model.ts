@@ -6,3 +6,7 @@ export interface Category {
   sortOrder?: number | null;
   isActive?: boolean;
 }
+
+export interface CategoryTreeNode extends Category {
+  children: CategoryTreeNode[];
+}
