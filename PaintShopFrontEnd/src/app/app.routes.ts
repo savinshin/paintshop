@@ -15,6 +15,12 @@ export const routes: Routes = [
         title: 'Автоэмали и автозапчасти — Барановичи | Главная',
       },
       {
+        path: 'about',
+        loadComponent: () =>
+          import('./features/about/about.page').then((m) => m.AboutPageComponent),
+        title: 'О нас',
+      },
+      {
         path: 'catalog',
         pathMatch: 'full',
         loadComponent: () =>
@@ -75,7 +81,7 @@ export const routes: Routes = [
         path: 'body-repair',
         loadComponent: () =>
           import('./features/cuz-remont/pages/cuz-remont-page/cuz-remont.page').then(m => m.CuzRemontPageComponent),
-        title: 'Кузовной ремонт',
+        title: 'Автосервис',
       },
       {
         path: 'privacy',

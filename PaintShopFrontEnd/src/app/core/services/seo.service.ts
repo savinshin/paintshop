@@ -31,6 +31,11 @@ export class SeoService {
     if (params.image) this.meta.updateTag({ property: 'og:image', content: params.image });
   }
 
+  clearOgUrlAndImage() {
+    this.meta.removeTag("property='og:url'");
+    this.meta.removeTag("property='og:image'");
+  }
+
   setJsonLd(key: string, data: unknown) {
     const id = `ld-json-${key}`;
     let scriptEl = this.document.getElementById(id) as HTMLScriptElement | null;

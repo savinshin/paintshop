@@ -13,7 +13,11 @@ export class CuzRemontPageComponent implements OnInit {
   private seo = inject(SeoService);
 
   ngOnInit(): void {
-    this.seo.setTitle('Контакты — Автокраски & Запчасти');
-    this.seo.setDescription('Адрес, график, телефон, email и мессенджеры магазина в Барановичах.');
+    const title = 'Автосервис';
+    const description = 'Кузовной ремонт после ДТП, покраска автомобиля и отдельных элементов, ремонт порогов.';
+    this.seo.setTitle(title);
+    this.seo.setDescription(description);
+    this.seo.clearOgUrlAndImage();
+    this.seo.setOg({ type: 'website', title, description });
   }
 }
