@@ -93,7 +93,7 @@ export class CategoryMultiselectComponent implements ControlValueAccessor {
     this.isOpen.set(false);
   }
 
-  onEscape(event: KeyboardEvent): void {
+  onEscape(event: Event): void {
     if (!this.isOpen()) return;
     event.stopPropagation();
     this.close();
