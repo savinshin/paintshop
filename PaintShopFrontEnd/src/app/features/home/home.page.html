@@ -36,6 +36,24 @@
   </div>
 </section>
 
+<section class="container mx-auto px-4 py-8" aria-label="Основные направления" aria-roledescription="карусель"
+  (keydown.arrowleft)="previousSlide(); $event.preventDefault()"
+  (keydown.arrowright)="nextSlide(); $event.preventDefault()">
+  <div aria-live="polite" aria-atomic="true">
+    <div role="group" aria-roledescription="слайд" [attr.aria-label]="(activeSlide() + 1) + ' из ' + slides.length">
+      @if (slides[activeSlide()].image; as image) {
+        <img src="{{ image.src }}" alt="{{ image.alt }}" />
+      }
+      <h2>{{ slides[activeSlide()].text }}</h2>
+      <p aria-hidden="true">Слайд {{ activeSlide() + 1 }} из {{ slides.length }}</p>
+    </div>
+  </div>
+  <div>
+    <button type="button" class="btn btn-outline" aria-label="Предыдущий слайд" (click)="previousSlide()">←</button>
+    <button type="button" class="btn btn-outline" aria-label="Следующий слайд" (click)="nextSlide()">→</button>
+  </div>
+</section>
+
 <section data-theme="wireframe" class="relative py-10">
   <!-- декоративные PNG (пример) -->
   <img src="/img/decor/dot.png" alt="" class="pointer-events-none absolute left-4 top-6 w-10 opacity-70" />
