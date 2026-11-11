@@ -1,6 +1,11 @@
 @use "tailwindcss";
 @plugin "daisyui" {
-  themes: black --default, cupcake, wireframe;
+  themes: halloween --default, cupcake, wireframe;
+}
+
+
+body {
+  font-family: 'Inter', sans-serif;
 }
 
 html, body {
