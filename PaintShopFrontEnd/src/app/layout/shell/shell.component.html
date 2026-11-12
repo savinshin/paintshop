@@ -1,5 +1,5 @@
 <!-- NAVBAR (sticky, big font, desktop: menu + phone + icons; mobile: logo smaller + phone only + dropdown) -->
-<header class="sticky top-0 z-50 border-b border-base-200 bg-base-100/90 backdrop-blur"
+<header class="sticky top-0 z-50 bg-base-100/90 backdrop-blur"
   (document:keydown.escape)="closeMenu()">
   <div class="w-full px-3 sm:px-6 lg:px-10">
     <div class="navbar px-0 min-h-16 md:min-h-20">
@@ -21,6 +21,7 @@
             [attr.inert]="menuOpen() ? null : ''"
             class="menu menu-sm dropdown-content mt-3 z-[70] p-2 shadow bg-base-100 rounded-box w-64 text-base"
             (click)="closeMenu()" (keydown.escape)="closeMenu()">
+            <li role="none"><a role="menuitem" routerLink="/">На главную</a></li>
             <li role="none"><a role="menuitem" routerLink="/about">О нас</a></li>
             <li role="none"><a role="menuitem" routerLink="/catalog/auto-parts">Автозапчасти</a></li>
             <li role="none"><a role="menuitem" routerLink="/catalog/materials">Материалы</a></li>
@@ -29,10 +30,7 @@
           </ul>
         </div>
 
-        <!-- Logo (shrinks on small screens) -->
-        <a routerLink="/" class="btn btn-ghost px-2">
-          <img src="/img/logo.svg" alt="Автомагазин" class="h-8 sm:h-9 md:h-10 w-auto object-contain" />
-        </a>
+        <a routerLink="/" class="hidden lg:inline-flex btn btn-ghost">На главную</a>
       </div>
 
       <!-- DESKTOP MENU (center, bigger font) -->
