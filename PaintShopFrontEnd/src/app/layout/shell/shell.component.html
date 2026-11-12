@@ -21,6 +21,7 @@
             [attr.inert]="menuOpen() ? null : ''"
             class="menu menu-sm dropdown-content mt-3 z-[70] p-2 shadow bg-base-100 rounded-box w-64 text-base"
             (click)="closeMenu()" (keydown.escape)="closeMenu()">
+            <li role="none"><a role="menuitem" routerLink="/">На главную</a></li>
             <li role="none"><a role="menuitem" routerLink="/about">О нас</a></li>
             <li role="none"><a role="menuitem" routerLink="/catalog/auto-parts">Автозапчасти</a></li>
             <li role="none"><a role="menuitem" routerLink="/catalog/materials">Материалы</a></li>
@@ -29,7 +30,7 @@
           </ul>
         </div>
 
-
+        <a routerLink="/" class="hidden lg:inline-flex btn btn-ghost">На главную</a>
       </div>
 
       <!-- DESKTOP MENU (center, bigger font) -->
