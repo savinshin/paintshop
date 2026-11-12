@@ -1,10 +1,10 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core';
-
+import { RouterLink } from '@angular/router';
 import { SeoService } from '@core/services/seo.service';
 
 @Component({
   standalone: true,
-  imports: [],
+  imports: [RouterLink],
   templateUrl: 'cuz-remont.page.html',
   styleUrl: 'cuz-remont.page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
