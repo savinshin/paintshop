@@ -1,5 +1,5 @@
 <!-- NAVBAR (sticky, big font, desktop: menu + phone + icons; mobile: logo smaller + phone only + dropdown) -->
-<header class="sticky top-0 z-50 border-b border-base-200 bg-base-100/90 backdrop-blur"
+<header class="sticky top-0 z-50 bg-base-100/90 backdrop-blur"
   (document:keydown.escape)="closeMenu()">
   <div class="w-full px-3 sm:px-6 lg:px-10">
     <div class="navbar px-0 min-h-16 md:min-h-20">
@@ -29,10 +29,7 @@
           </ul>
         </div>
 
-        <!-- Logo (shrinks on small screens) -->
-        <a routerLink="/" class="btn btn-ghost px-2">
-          <img src="/img/logo.svg" alt="Автомагазин" class="h-8 sm:h-9 md:h-10 w-auto object-contain" />
-        </a>
+
       </div>
 
       <!-- DESKTOP MENU (center, bigger font) -->
