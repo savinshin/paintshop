@@ -1,49 +1,399 @@
-<section class="py-8 md:py-10">
-  <div class="container">
-    <h1 class="text-2xl font-semibold">Автосервис</h1>
-    <ul class="mt-6 list-disc space-y-2 pl-5">
-      <li>Кузовной ремонт после ДТП</li>
-      <li>Покраска автомобиля целиком</li>
-      <li>Покраска бампера</li>
-      <li>Покраска отдельного элемента</li>
-      <li>Покраска авто в камере</li>
-      <li>Ремонт порогов</li>
-    </ul>
+<!-- AUTO SERVICE PAGE -->
+<section class="w-full bg-white text-[#171717] font-['JetBrains_Mono',monospace]">
+
+  <!-- BACK TO HOME -->
+  <div class="mx-auto max-w-6xl px-5 pt-6 sm:px-8 md:pt-8">
+    <a routerLink="/" class="group inline-flex min-h-11 items-center gap-3
+             text-xs font-medium uppercase tracking-[0.08em]
+             text-[#171717] transition-colors duration-200
+             hover:text-[#FF571C]
+             focus-visible:outline-2 focus-visible:outline-offset-4
+             focus-visible:outline-[#FF571C]">
+      <svg class="size-5 transition-transform duration-200
+               group-hover:-translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M19 12H5M12 19l-7-7 7-7" />
+      </svg>
+      <span>На главную</span>
+    </a>
   </div>
-      <!-- BRANDS -->
-    <h3 class="text-xl font-semibold text-white">Бренды</h3>
 
-    <ul class="mt-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
-      <li class="relative overflow-hidden rounded-2xl h-24 md:h-28
-             border border-white/18 ring-1 ring-white/8
-             bg-transparent backdrop-blur-2xl backdrop-saturate-150">
-        <img src="/img/brands/3M.png" alt="3M" class="h-full w-full object-contain bg-white" />
-      </li>
+  <!-- INTRO -->
+  <div class="mx-auto max-w-6xl px-5 pt-12 pb-16
+              text-center sm:px-8 md:pt-20 md:pb-24">
 
-      <li
-        class="relative overflow-hidden rounded-2xl h-24 md:h-28 border border-white/18 ring-1 ring-white/8 bg-transparent backdrop-blur-2xl backdrop-saturate-150">
-        <img src="/img/brands/spectral.svg" alt="Spectral" class="h-full w-full object-cover" />
-      </li>
+    <p class="mb-7 text-[11px] uppercase tracking-[0.16em]
+              text-[#FF571C]">
+      КУЗОВ / АВТОСЕРВИС
+    </p>
 
-      <li
-        class="relative overflow-hidden rounded-2xl h-24 md:h-28 border border-white/18 ring-1 ring-white/8 bg-transparent backdrop-blur-2xl backdrop-saturate-150">
-        <img src="/img/brands/novol.svg" alt="Novol" class="h-full w-full object-cover" />
-      </li>
+    <h1 class="mx-auto max-w-5xl
+               text-[clamp(2.1rem,7vw,6rem)]
+               font-bold leading-[1.05]
+               tracking-[-0.075em]">
+      АВТОСЕРВИС
+      <span class="block text-[#FF571C]">
+        КУЗОВНОЙ РЕМОНТ
+      </span>
+    </h1>
 
-      <li
-        class="relative overflow-hidden rounded-2xl h-24 md:h-28 border border-white/18 ring-1 ring-white/8 bg-transparent backdrop-blur-2xl backdrop-saturate-150">
-        <img src="/img/brands/reoflex.jpg" alt="Reoflex" class="h-full w-full object-cover" />
-      </li>
+    <p class="mx-auto mt-9 max-w-2xl text-sm
+              leading-[1.85] text-[#555555]
+              sm:text-base">
+      Кузовной ремонт и покраска автомобилей.
+      От устранения небольших повреждений
+      до восстановления кузова после ДТП.
+    </p>
 
-      <li
-        class="relative overflow-hidden rounded-2xl h-24 md:h-28 border border-white/18 ring-1 ring-white/8 bg-transparent backdrop-blur-2xl backdrop-saturate-150">
-        <img src="/img/brands/dupont.jpg" alt="DuPont" class="h-full w-full object-cover" />
-      </li>
+  </div>
 
-      <li
-        class="relative overflow-hidden rounded-2xl h-24 md:h-28 border border-white/18 ring-1 ring-white/8 bg-transparent backdrop-blur-2xl backdrop-saturate-150">
-        <img src="/img/brands/mipa.png" alt="Mipa" class="h-full w-full object-cover p-2" />
-      </li>
-    </ul>
- 
+  <!-- SERVICES -->
+  <div class="border-t border-[#E5E5E5]">
+
+    <div class="mx-auto max-w-6xl px-5 py-16
+                sm:px-8 md:py-24">
+
+      <div class="mb-10 grid gap-5 md:grid-cols-2 md:items-end">
+
+        <div>
+          <p class="mb-6 text-[11px] uppercase tracking-[0.16em]
+                    text-[#FF571C]">
+            01 / НАШИ УСЛУГИ
+          </p>
+
+          <h2 class="text-3xl font-medium leading-[1.15]
+                     tracking-[-0.06em]
+                     sm:text-4xl lg:text-5xl">
+            ЧТО МЫ
+            <span class="text-[#FF571C]">
+              ДЕЛАЕМ
+            </span>
+          </h2>
+        </div>
+
+        <p class="max-w-md text-sm leading-[1.8]
+                  text-[#555555] md:justify-self-end">
+          Выполняем кузовные и покрасочные работы
+          с использованием профессионального
+          оборудования и проверенных материалов.
+        </p>
+
+      </div>
+
+      <!-- Service cards -->
+      <div class="grid grid-cols-2 gap-3
+                  md:grid-cols-3 md:gap-4
+                  xl:grid-cols-6">
+
+        <!-- Service 1 -->
+        <article class="flex min-h-44 flex-col justify-between
+                        rounded-xl bg-[#FF571C] p-4
+                        text-white sm:min-h-52 sm:p-5">
+
+          <span class="text-[10px] text-white/75">
+            01
+          </span>
+
+          <h3 class="text-sm font-medium leading-[1.35]
+                     tracking-tight sm:text-base">
+            Кузовной ремонт после ДТП
+          </h3>
+        </article>
+
+        <!-- Service 2 -->
+        <article class="flex min-h-44 flex-col justify-between
+                        rounded-xl bg-[#1D1D1D] p-4
+                        text-white sm:min-h-52 sm:p-5">
+
+          <span class="text-[10px] text-[#FF571C]">
+            02
+          </span>
+
+          <h3 class="text-sm font-medium leading-[1.35]
+                     tracking-tight sm:text-base">
+            Покраска автомобиля целиком
+          </h3>
+        </article>
+
+        <!-- Service 3 -->
+        <article class="flex min-h-44 flex-col justify-between
+                        rounded-xl bg-[#55575B] p-4
+                        text-white sm:min-h-52 sm:p-5">
+
+          <span class="text-[10px] text-white/75">
+            03
+          </span>
+
+          <h3 class="text-sm font-medium leading-[1.35]
+                     tracking-tight sm:text-base">
+            Покраска бампера
+          </h3>
+        </article>
+
+        <!-- Service 4 -->
+        <article class="flex min-h-44 flex-col justify-between
+                        rounded-xl bg-[#FF571C] p-4
+                        text-white sm:min-h-52 sm:p-5">
+
+          <span class="text-[10px] text-white/75">
+            04
+          </span>
+
+          <h3 class="text-sm font-medium leading-[1.35]
+                     tracking-tight sm:text-base">
+            Покраска отдельного элемента
+          </h3>
+        </article>
+
+        <!-- Service 5 -->
+        <article class="flex min-h-44 flex-col justify-between
+                        rounded-xl bg-[#1D1D1D] p-4
+                        text-white sm:min-h-52 sm:p-5">
+
+          <span class="text-[10px] text-[#FF571C]">
+            05
+          </span>
+
+          <h3 class="text-sm font-medium leading-[1.35]
+                     tracking-tight sm:text-base">
+            Покраска авто в камере
+          </h3>
+        </article>
+
+        <!-- Service 6 -->
+        <article class="flex min-h-44 flex-col justify-between
+                        rounded-xl bg-[#55575B] p-4
+                        text-white sm:min-h-52 sm:p-5">
+
+          <span class="text-[10px] text-white/75">
+            06
+          </span>
+
+          <h3 class="text-sm font-medium leading-[1.35]
+                     tracking-tight sm:text-base">
+            Ремонт порогов
+          </h3>
+        </article>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MATERIALS AND BRANDS -->
+  <section class="border-y border-[#E5E5E5] bg-[#F7F7F7]">
+
+    <div class="mx-auto max-w-6xl px-5 py-16
+              sm:px-8 md:py-24">
+
+      <!-- Heading -->
+      <div class="grid gap-8 md:grid-cols-2 md:items-end">
+
+        <div>
+          <p class="mb-7 text-[11px] uppercase tracking-[0.16em]
+                  text-[#FF571C]">
+            02 / МАТЕРИАЛЫ
+          </p>
+
+          <h2 class="text-3xl font-medium leading-[1.2]
+                   tracking-[-0.06em]
+                   sm:text-4xl lg:text-5xl">
+            ПРОФЕССИОНАЛЬНЫЕ
+            <span class="text-[#FF571C]">
+              МАТЕРИАЛЫ.
+            </span>
+          </h2>
+        </div>
+
+        <p class="max-w-md text-sm leading-[1.9]
+                text-[#555555] md:justify-self-end">
+          Используем проверенные материалы
+          и оборудование для кузовных
+          и покрасочных работ.
+        </p>
+
+      </div>
+
+      <!-- Brand logos -->
+
+      <div class="mt-12 grid grid-cols-2 gap-3
+            sm:grid-cols-3 lg:grid-cols-6">
+
+        @for (brand of [
+        { name: 'Novol', image: 'novol.svg' },
+        { name: 'Spectral', image: 'spectral.svg' },
+        { name: '3M', image: '3M.png' },
+        { name: 'Reoflex', image: 'reoflex.jpg' },
+        { name: 'Название бренда 5', image: 'brand-five.webp' },
+        { name: 'Название бренда 6', image: 'brand-six.svg' }
+        ]; track brand.name) {
+
+        <div class="flex h-24 items-center justify-center
+                rounded-lg border border-[#D5D5D5]
+                bg-white p-4
+                transition-colors duration-200
+                hover:border-[#FF571C]">
+
+          <img [src]="'/img/brands/' + brand.image" [alt]="'Логотип ' + brand.name" loading="lazy"
+            class="max-h-14 w-full object-contain" />
+
+        </div>
+
+        }
+
+      </div>
+
+
+    </div>
+  </section>
+
+
+  <!-- EXPERIENCE -->
+  <div class="bg-[#171717] text-white">
+
+    <div class="mx-auto grid max-w-6xl gap-10
+                px-5 py-16 sm:px-8
+                md:grid-cols-2 md:items-center md:py-24">
+
+      <div>
+        <p class="mb-6 text-[11px] uppercase
+                  tracking-[0.16em] text-[#FF571C]">
+          03 / ОПЫТ
+        </p>
+
+        <h2 class="text-3xl font-medium leading-[1.18]
+                   tracking-[-0.06em]
+                   sm:text-4xl lg:text-5xl">
+          ОПЫТ,
+          <span class="text-[#FF571C]">
+            ПРОВЕРЕННЫЙ
+          </span>
+          ВРЕМЕНЕМ.
+        </h2>
+
+        <div class="mt-10 flex items-baseline gap-4">
+
+          <span class="font-['Intel_One_Mono',monospace]
+                       text-6xl font-bold leading-none
+                       tracking-[-0.09em] text-[#FF571C]
+                       sm:text-7xl">
+            20+
+          </span>
+
+          <span class="text-sm text-white/75">
+            лет работы
+            <br>
+            компании
+          </span>
+
+        </div>
+
+        <p class="mt-8 max-w-lg text-sm
+                  leading-[1.9] text-white/75
+                  sm:text-base">
+          За годы работы мы изучили требования
+          к кузовному ремонту и особенности
+          восстановления автомобилей.
+          Используем профессиональное оборудование
+          и уделяем внимание каждому этапу работы.
+        </p>
+      </div>
+
+      <div class="relative aspect-[4/5] w-full
+                  max-w-[460px] overflow-hidden
+                  rounded-2xl md:justify-self-end">
+
+        <img src="/img/cards/auto-service.webp" alt="Автомобиль в автосервисе" loading="lazy" class="absolute inset-0 h-full w-full
+                 object-cover" />
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- QUALITY -->
+  <div class="mx-auto grid max-w-6xl gap-10
+              px-5 py-16 sm:px-8
+              md:grid-cols-12 md:items-center
+              md:py-28">
+
+    <div class="md:col-span-5">
+
+      <div class="relative aspect-[3/4] w-full
+                  max-w-[420px] overflow-hidden
+                  rounded-2xl bg-[#202020]">
+
+        <img src="/img/cards/body-repair.webp" alt="Материалы для кузовного ремонта" loading="lazy" class="absolute inset-0 h-full w-full
+                 object-cover" />
+
+      </div>
+    </div>
+
+    <div class="md:col-span-7 md:pl-8">
+
+      <p class="mb-7 text-[11px] uppercase
+                tracking-[0.16em] text-[#FF571C]">
+        04 / КАЧЕСТВО
+      </p>
+
+      <h2 class="text-3xl font-medium leading-[1.2]
+                 tracking-[-0.06em]
+                 sm:text-4xl lg:text-5xl">
+        ВНИМАНИЕ
+        <span class="text-[#FF571C]">
+          К ДЕТАЛЯМ.
+        </span>
+      </h2>
+
+      <p class="mt-8 max-w-xl text-sm leading-[1.9]
+                text-[#555555] sm:text-base">
+        Качественный кузовной ремонт требует
+        точности, подходящих материалов
+        и соблюдения технологии.
+      </p>
+
+      <p class="mt-5 max-w-xl text-sm leading-[1.9]
+                text-[#555555] sm:text-base">
+        Мы стремимся не только восстановить
+        внешний вид автомобиля, но и обеспечить
+        долговечность выполненных работ.
+      </p>
+
+    </div>
+  </div>
+
+
+
+  <!-- FINAL STATEMENT -->
+  <div class="bg-[#171717] text-white">
+
+    <div class="mx-auto max-w-6xl px-5 py-16
+                sm:px-8 md:py-24">
+
+      <p class="mb-8 text-[11px] uppercase
+                tracking-[0.16em] text-[#FF571C]">
+        КУЗОВ / АВТОСЕРВИС
+      </p>
+
+      <h2 class="max-w-5xl text-[clamp(2rem,5.5vw,5rem)]
+                 font-medium leading-[1.16]
+                 tracking-[-0.065em]">
+        ВОССТАНАВЛИВАЕМ
+        <span class="text-[#FF571C]">
+          ВНЕШНИЙ ВИД.
+        </span>
+        УДЕЛЯЕМ ВНИМАНИЕ
+        КАЧЕСТВУ.
+      </h2>
+
+      <p class="mt-8 max-w-xl text-sm leading-[1.9]
+                text-white/70 sm:text-base">
+        Кузовной ремонт и покраска автомобиля
+        с вниманием к деталям,
+        материалам и технологии работы.
+      </p>
+
+    </div>
+  </div>
+
 </section>
